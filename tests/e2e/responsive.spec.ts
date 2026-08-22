@@ -47,27 +47,29 @@ test.describe("200% zoom (simulated via half-size viewport on chromium)", () => 
 });
 
 test.describe("reduced motion", () => {
-  test("pages render completely with prefers-reduced-motion: reduce", async ({
+  test("all motion is instant/near-instant with prefers-reduced-motion: reduce", async ({
     browser,
   }) => {
     const context = await browser.newContext({ reducedMotion: "reduce" });
     const page = await context.newPage();
-    await page.goto("/projects/spotify-sorter/");
+    await page.goto("/");
+    // Graph highlights use short CSS transitions; under reduced motion every
+    // duration must resolve to effectively zero.
+    const maxDurationMs = await page.evaluate(() => {
+      let max = 0;
+      for (const el of document.querySelectorAll("body *")) {
+        const style = window.getComputedStyle(el);
+        const duration = parseFloat(style.transitionDuration || "0") * 1000;
+        const delay = parseFloat(style.transitionDelay || "0") * 1000;
+        if (style.animationName !== "none") return Number.POSITIVE_INFINITY;
+        max = Math.max(max, duration + delay);
+      }
+      return max;
+    });
+    expect(maxDurationMs).toBeLessThanOrEqual(50);
     await expect(
-      page.getByRole("heading", { level: 1, name: "Spotify Sorter" }),
+      page.getByRole("heading", { level: 1, name: "Bi Phan" }),
     ).toBeVisible();
-    // No animation or transition is defined anywhere in the Goal 1 UI.
-    const animated = await page.evaluate(
-      () =>
-        [...document.querySelectorAll("body *")].filter((el) => {
-          const style = window.getComputedStyle(el);
-          return (
-            style.animationName !== "none" ||
-            (style.transitionDuration !== "0s" && style.transitionDuration !== "")
-          );
-        }).length,
-    );
-    expect(animated).toBe(0);
     await context.close();
   });
 });

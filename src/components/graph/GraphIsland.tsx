@@ -82,7 +82,11 @@ export default function GraphIsland({
       data-viewport={viewport}
       onKeyDown={(event) => {
         if (event.key === "Escape") {
-          setInteraction((prev) => ({ ...prev, pinnedNodeId: null }));
+          setInteraction((prev) => ({
+            ...prev,
+            pinnedNodeId: null,
+            hoveredNodeId: null,
+          }));
         }
       }}
     >
@@ -93,9 +97,14 @@ export default function GraphIsland({
         activeNodeId={activeNodeId}
         pinnedNodeId={interaction.pinnedNodeId}
         relatedIdsByNode={relatedIdsByNode}
-        onNodeHover={(nodeId) =>
-          setInteraction((prev) => ({ ...prev, hoveredNodeId: nodeId }))
-        }
+        onNodeHover={(nodeId) => {
+          // Stable-last-hover: moving toward the detail region must not
+          // detach its links mid-click. Hover is superseded by focusing or
+          // hovering another node, and cleared by Escape (D7).
+          if (nodeId !== null) {
+            setInteraction((prev) => ({ ...prev, hoveredNodeId: nodeId }));
+          }
+        }}
         onNodeFocus={(nodeId) =>
           setInteraction((prev) => ({ ...prev, focusedNodeId: nodeId }))
         }

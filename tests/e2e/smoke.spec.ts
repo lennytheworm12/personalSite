@@ -37,10 +37,11 @@ test.describe("static route smoke", () => {
       "contact-linkedin",
       "contact-resume",
       "contact-email",
-      "contact-leetcode",
     ]) {
       await expect(page.locator(`#${id}`)).toBeAttached();
     }
+    // LeetCode is deferred (decisions-log.md R2): no LeetCode placeholder.
+    await expect(page.locator("#contact-leetcode")).toHaveCount(0);
     // Unresolved URLs are never invented as links.
     await expect(page.locator("#contact-github a")).toHaveCount(0);
     await expect(page.locator("#contact-github")).toContainText("not yet published");
@@ -54,12 +55,14 @@ test.describe("static route smoke", () => {
       await expect(
         page.getByRole("region", { name: "Not yet documented" }),
       ).toBeVisible();
-      await expect(page.locator(".badge")).toHaveText("Placeholder case study");
-      const unresolvedItems = page.locator(".unresolved-list code");
       await expect(
-        unresolvedItems.filter({ hasText: /^contributions$/ }),
+        page.locator("article header").getByText("Placeholder case study"),
       ).toBeVisible();
-      await expect(unresolvedItems.filter({ hasText: /^technologies$/ })).toBeVisible();
+      const unresolvedItems = page.locator(".unresolved-list code");
+      await expect(unresolvedItems.filter({ hasText: /^metrics$/ })).toBeVisible();
+      await expect(unresolvedItems.filter({ hasText: /^links$/ })).toBeVisible();
+      // Provisional narrative sections are labeled as drafts, never final.
+      await expect(page.getByText("Provisional draft").first()).toBeVisible();
     }
   });
 });
