@@ -3,6 +3,9 @@
   "include": [".astro/types.d.ts", "src/**/*"],
   "exclude": ["dist", "node_modules", "tests", "scripts"],
   "compilerOptions": {
+    // Explicit so type-aware linting resolves process/node APIs even on a
+    // fresh checkout before `.astro/types.d.ts` has been generated.
+    "types": ["node"],
     "paths": {
       "@/*": ["./src/*"]
     },
