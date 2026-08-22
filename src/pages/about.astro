@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import { buildMetadata } from "@/lib/metadata";
+import { withBase } from "@/lib/base-path";
 
 const metadata = buildMetadata({
   title: "About",
@@ -26,11 +27,11 @@ const metadata = buildMetadata({
     <h2 id="now-heading">What I'm working on</h2>
     <p>
       Two projects are currently being documented on this site:
-      <a href="/projects/spotify-sorter/">Spotify Sorter</a> and
-      <a href="/projects/game-teacher/">Game Teacher</a>. Their case studies will grow
-      as confirmed facts replace placeholders.
+      <a href={withBase("/projects/spotify-sorter/")}>Spotify Sorter</a> and
+      <a href={withBase("/projects/game-teacher/")}>Game Teacher</a>. Their case studies
+      will grow as confirmed facts replace placeholders.
     </p>
   </section>
 
-  <p><a href="/">← Back to home</a></p>
+  <p><a href={withBase("/")}>← Back to home</a></p>
 </BaseLayout>

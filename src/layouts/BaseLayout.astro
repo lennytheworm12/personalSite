@@ -1,5 +1,5 @@
 ---
-import { SITE, buildMetadata } from "@/lib/metadata";
+import { buildMetadata } from "@/lib/metadata";
 import SiteNav from "@/components/SiteNav.astro";
 import "@/styles/global.css";
 
@@ -9,7 +9,6 @@ interface Props {
 }
 
 const { metadata, currentPath = "/" } = Astro.props;
-const canonicalUrl = new URL(metadata.canonicalPath, SITE.url);
 ---
 
 <!doctype html>
@@ -19,7 +18,7 @@ const canonicalUrl = new URL(metadata.canonicalPath, SITE.url);
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{metadata.title}</title>
     <meta name="description" content={metadata.description} />
-    <link rel="canonical" href={canonicalUrl} />
+    <link rel="canonical" href={metadata.canonicalUrl} />
     <meta property="og:title" content={metadata.title} />
     <meta property="og:description" content={metadata.description} />
     <meta property="og:type" content="website" />

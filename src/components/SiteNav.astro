@@ -1,4 +1,6 @@
 ---
+import { withBase } from "@/lib/base-path";
+
 interface Props {
   currentPath?: string;
 }
@@ -23,7 +25,7 @@ const current = normalize(currentPath);
         links.map((link) => (
           <li>
             <a
-              href={link.href}
+              href={withBase(link.href)}
               aria-current={normalize(link.href) === current ? "page" : undefined}
             >
               {link.label}

@@ -2,6 +2,7 @@
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import UnresolvedList from "@/components/UnresolvedList.astro";
 import { buildMetadata } from "@/lib/metadata";
+import { withBase } from "@/lib/base-path";
 import { projects } from "@/content/projects";
 
 export function getStaticPaths() {
@@ -107,5 +108,5 @@ const metadata = buildMetadata({
     }
   </article>
 
-  <p><a href="/">← Back to home</a></p>
+  <p><a href={withBase("/")}>← Back to home</a></p>
 </BaseLayout>

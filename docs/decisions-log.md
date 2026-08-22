@@ -25,6 +25,13 @@ absence and no-JS usability in Playwright.
 Single schema drives both Index and generated case-study routes; explicit
 rejection paths give natural negative/malformed-data tests.
 
+### D5 — Hosting: GitHub Pages now, custom domain later (2026-08-22)
+User chose GitHub Pages as the MVP host; a custom domain on Cloudflare
+Pages is planned post-MVP. Base path (`DEPLOY_BASE_PATH`) and public URL
+(`SITE_PUBLIC_URL`) are build-time environment variables consumed by
+`astro.config.mjs` and `src/lib/base-path.ts`, so the same source builds
+for a subpath (`/personalSite/`) or a root domain without code changes.
+
 ## Blockers
 
 ### B1 — Canonical design notes missing

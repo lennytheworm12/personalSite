@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import { buildMetadata } from "@/lib/metadata";
+import { withBase } from "@/lib/base-path";
 
 const metadata = buildMetadata({
   title: "Page not found",
@@ -16,9 +17,9 @@ const metadata = buildMetadata({
     address may be mistyped.
   </p>
   <p>
-    You can start again from the <a href="/">home page</a>, browse
-    <a href="/projects/spotify-sorter/">Spotify Sorter</a> or
-    <a href="/projects/game-teacher/">Game Teacher</a>, or read
-    <a href="/about/">the About page</a>.
+    You can start again from the <a href={withBase("/")}>home page</a>, browse
+    <a href={withBase("/projects/spotify-sorter/")}>Spotify Sorter</a> or
+    <a href={withBase("/projects/game-teacher/")}>Game Teacher</a>, or read
+    <a href={withBase("/about/")}>the About page</a>.
   </p>
 </BaseLayout>

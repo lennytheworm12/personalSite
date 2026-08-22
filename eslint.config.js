@@ -16,6 +16,13 @@ export default tseslint.config(
     ],
   },
   eslint.configs.recommended,
+  // Plain JS config files: Node globals without type-aware rules.
+  {
+    files: ["**/*.mjs", "**/*.js"],
+    languageOptions: {
+      globals: { ...globals.node },
+    },
+  },
   // Type-aware rules only for TypeScript files covered by a tsconfig.
   {
     files: ["**/*.ts", "**/*.tsx"],

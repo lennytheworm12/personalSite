@@ -1,7 +1,14 @@
+import { BASE_PATH, joinBase, withBase } from "./base-path";
+
+/**
+ * Public site identity. The production URL is a build-time setting so the
+ * canonical/OG metadata stays correct on any host.
+ */
 export const SITE = {
   name: "Bi Phan — Portfolio",
-  /** Unresolved personal fact: production URL decided at deploy time. */
-  url: "https://example.com",
+  url:
+    process.env.SITE_PUBLIC_URL?.trim() ||
+    "https://lennytheworm12.github.io/personalSite/",
   description:
     "Portfolio of Bi Phan: software projects including Spotify Sorter and Game Teacher.",
 } as const;
@@ -9,7 +16,7 @@ export const SITE = {
 export interface PageMetadata {
   title: string;
   description: string;
-  canonicalPath: string;
+  canonicalUrl: string;
 }
 
 /**
@@ -21,10 +28,11 @@ export function buildMetadata(input: {
   description?: string;
   path: string;
 }): PageMetadata {
-  const normalizedPath = input.path.startsWith("/") ? input.path : `/${input.path}`;
   return {
     title: input.title ? `${input.title} — ${SITE.name}` : SITE.name,
     description: input.description ?? SITE.description,
-    canonicalPath: normalizedPath.replace(/\/+$/, "") || "/",
+    canonicalUrl: new URL(joinBase(BASE_PATH, input.path), SITE.url).toString(),
   };
 }
+
+export { withBase };

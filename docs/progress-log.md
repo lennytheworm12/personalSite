@@ -45,3 +45,19 @@
   vitest 29/29 → build → verify:build → playwright 160/160) ✓
 - Budgets: dist total ≈ 210 KiB, largest page ≈ 5 KiB (budgets 512 KiB /
   64 KiB). Secret scan over all emitted files: clean.
+
+## 2026-08-22 — Pushed to GitHub; CI green; GitHub Pages wired up
+- Integrated remote's initial commit (MIT LICENSE + README stub) via
+  rebase — LICENSE preserved; README conflict resolved in favor of ours.
+- Fixed a real CI catch: two docs files committed post-format failed
+  `format:check`; fixed and CI fully green.
+- Added `src/lib/base-path.ts` (`joinBase`/`withBase`, unit-tested with
+  boundary cases) + build-time env config (`DEPLOY_BASE_PATH`,
+  `SITE_PUBLIC_URL`) so the same source deploys under GitHub Pages'
+  `/personalSite/` subpath or a future root custom domain.
+- All internal links routed through `withBase()`; verified a
+  base-prefixed production build locally (links correct, budgets pass).
+- New `.github/workflows/deploy.yml`: build with Pages env → verify-build →
+  upload → deploy-pages. Pages enabled via API (`build_type=workflow`).
+- Full local suite re-run green: format ✓ lint ✓ types ✓ content ✓
+  unit/integration 35/35 ✓ build ✓ build-gate ✓ e2e 160/160 ✓.

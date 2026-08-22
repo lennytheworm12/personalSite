@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import { buildMetadata } from "@/lib/metadata";
+import { withBase } from "@/lib/base-path";
 import { projects } from "@/content/projects";
 import { ProjectCard } from "@/components/ProjectCard";
 
@@ -57,7 +58,7 @@ const contacts = [
             {contact.href ? (
               <>
                 <strong>{contact.label}:</strong>{" "}
-                <a href={contact.href}>{contact.note}</a>
+                <a href={withBase(contact.href)}>{contact.note}</a>
               </>
             ) : (
               <>

@@ -1,4 +1,5 @@
 import type { ProjectRecord } from "@/content/project-schema";
+import { withBase } from "@/lib/base-path";
 
 interface Props {
   project: Pick<ProjectRecord, "title" | "tagline" | "status" | "summary" | "slug">;
@@ -12,7 +13,7 @@ export function ProjectCard({ project }: Props) {
   return (
     <li className="project-card">
       <h3>
-        <a href={`/projects/${project.slug}/`}>{project.title}</a>
+        <a href={withBase(`/projects/${project.slug}/`)}>{project.title}</a>
       </h3>
       <p>
         {project.tagline}{" "}
