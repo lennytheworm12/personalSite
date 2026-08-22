@@ -12,13 +12,26 @@ export function getStaticPaths() {
   }));
 }
 
-const { project } = Astro.props;
+interface Props {
+  project: (typeof projects)[number];
+}
+
+const { project } = Astro.props as Props;
 
 const metadata = buildMetadata({
   title: project.title,
   description: project.tagline,
   path: `/projects/${project.slug}/`,
 });
+
+const narrativeSections = [
+  { key: "motivation", heading: "Motivation" },
+  { key: "contribution", heading: "Contribution" },
+  { key: "evidence", heading: "Evidence" },
+  { key: "challenges", heading: "Challenges" },
+  { key: "outcomes", heading: "Outcomes" },
+  { key: "nextSteps", heading: "Next steps" },
+] as const;
 ---
 
 <BaseLayout metadata={metadata} currentPath={`/projects/${project.slug}/`}>
@@ -41,25 +54,56 @@ const metadata = buildMetadata({
     </section>
 
     {
-      project.contributions.length > 0 && (
-        <section aria-labelledby="contributions-heading">
-          <h2 id="contributions-heading">Contributions</h2>
-          <ul>
-            {project.contributions.map((contribution) => (
-              <li>{contribution}</li>
-            ))}
-          </ul>
-        </section>
-      )
+      narrativeSections.map(({ key, heading }) => {
+        const section = project[key];
+        return section ? (
+          <section aria-labelledby={`${key}-heading`}>
+            <h2 id={`${key}-heading`}>{heading}</h2>
+            <p>
+              {section.text}
+              {section.provisional && (
+                <span class="badge badge-provisional">Provisional draft</span>
+              )}
+            </p>
+          </section>
+        ) : null;
+      })
     }
 
     {
       project.technologies.length > 0 && (
         <section aria-labelledby="technologies-heading">
           <h2 id="technologies-heading">Technologies</h2>
-          <ul>
+          <dl>
             {project.technologies.map((technology) => (
-              <li>{technology}</li>
+              <>
+                <dt>
+                  {technology.label}
+                  <span class="badge">{technology.category}</span>
+                  {technology.verification !== "verified" && (
+                    <span class="badge badge-provisional">
+                      {technology.verification}
+                    </span>
+                  )}
+                </dt>
+                <dd>
+                  {technology.purpose.text}
+                  {technology.purpose.provisional && " (provisional)"}
+                </dd>
+              </>
+            ))}
+          </dl>
+        </section>
+      )
+    }
+
+    {
+      project.concepts.length > 0 && (
+        <section aria-labelledby="concepts-heading">
+          <h2 id="concepts-heading">Concepts</h2>
+          <ul>
+            {project.concepts.map((concept) => (
+              <li>{concept}</li>
             ))}
           </ul>
         </section>
@@ -70,17 +114,9 @@ const metadata = buildMetadata({
       project.metrics.length > 0 && (
         <section aria-labelledby="metrics-heading">
           <h2 id="metrics-heading">Metrics</h2>
-          <dl>
-            {project.metrics.map((metric) => (
-              <>
-                <dt>{metric.label}</dt>
-                <dd>
-                  {metric.value}
-                  {metric.unit ? ` ${metric.unit}` : ""}
-                </dd>
-              </>
-            ))}
-          </dl>
+          <p class="placeholder-note">
+            No quantitative evidence is claimed for this project yet.
+          </p>
         </section>
       )
     }

@@ -13,8 +13,19 @@ const validRecord: RawProjectRecord = {
   tagline: "A test tagline.",
   summary: "A summary long enough to be meaningful.",
   status: "published",
-  contributions: ["Built the thing."],
-  technologies: ["TypeScript"],
+  featured: false,
+  unresolved: ["motivation", "evidence", "challenges", "outcomes", "nextSteps"],
+  concepts: ["test automation"],
+  contribution: { text: "Built the thing.", provisional: true },
+  technologies: [
+    {
+      id: "typescript",
+      label: "TypeScript",
+      category: "language",
+      purpose: { text: "Core language.", provisional: true },
+      verification: "provisional",
+    },
+  ],
   metrics: [{ label: "Users", value: 10 }],
   links: [{ label: "Repository", url: "https://example.com/repo", role: "repository" }],
 };
@@ -30,16 +41,46 @@ describe("parseProjectRecord — positive", () => {
     const parsed = parseProjectRecord({
       ...validRecord,
       status: "placeholder",
-      unresolved: ["contributions", "technologies", "metrics", "links"],
-      contributions: undefined,
+      unresolved: [
+        "concepts",
+        "motivation",
+        "contribution",
+        "evidence",
+        "challenges",
+        "outcomes",
+        "nextSteps",
+        "technologies",
+        "metrics",
+        "links",
+      ],
+      concepts: undefined,
+      contribution: undefined,
       technologies: undefined,
       metrics: undefined,
       links: undefined,
     });
-    expect(parsed.contributions).toEqual([]);
+    expect(parsed.concepts).toEqual([]);
+    expect(parsed.memories).toEqual([]);
     expect(parsed.technologies).toEqual([]);
     expect(parsed.metrics).toEqual([]);
     expect(parsed.links).toEqual([]);
+    expect(parsed.motivation).toBeUndefined();
+    // Empty memories are explicitly valid (decisions-log.md R5).
+    expect(Array.isArray(parsed.memories)).toBe(true);
+  });
+
+  it("accepts empty memories on any record", () => {
+    const parsed = parseProjectRecord({ ...validRecord, memories: [] });
+    expect(parsed.memories).toEqual([]);
+  });
+
+  it("accepts provisional narrative sections and preserves their flag", () => {
+    const parsed = parseProjectRecord({
+      ...validRecord,
+      motivation: { text: "DRAFT text.", provisional: true },
+      unresolved: validRecord.unresolved.filter((name) => name !== "motivation"),
+    });
+    expect(parsed.motivation?.provisional).toBe(true);
   });
 });
 
@@ -88,6 +129,46 @@ describe("parseProjectRecord — negative", () => {
     expect(() =>
       parseProjectRecord({ ...validRecord, unresolved: ["technologies"] }),
     ).toThrow(/"technologies" has data but is also listed as unresolved/);
+  });
+
+  it("rejects a missing narrative section that is not declared unresolved", () => {
+    expect(() => parseProjectRecord({ ...validRecord, unresolved: [] })).toThrow(
+      /empty "motivation" must be listed as unresolved/,
+    );
+  });
+
+  it("rejects an invalid technology id", () => {
+    expect(() =>
+      parseProjectRecord({
+        ...validRecord,
+        technologies: [
+          {
+            id: "Bad Tech ID!",
+            label: "TypeScript",
+            category: "language",
+            purpose: { text: "Core language.", provisional: true },
+            verification: "provisional",
+          },
+        ],
+      }),
+    ).toThrow(/technology id/);
+  });
+
+  it("rejects an empty technology label", () => {
+    expect(() =>
+      parseProjectRecord({
+        ...validRecord,
+        technologies: [
+          {
+            id: "typescript",
+            label: "  ",
+            category: "language",
+            purpose: { text: "Core language.", provisional: true },
+            verification: "provisional",
+          },
+        ],
+      }),
+    ).toThrow(/technology label must not be empty/);
   });
 });
 

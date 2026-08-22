@@ -177,6 +177,13 @@ a {
   vertical-align: middle;
 }
 
+/* Dashed border marks provisional/draft content without relying on color. */
+.badge-provisional {
+  border-style: dashed;
+  font-size: 0.72rem;
+  letter-spacing: 0.03em;
+}
+
 .site-footer {
   border-top: 1px solid var(--color-border);
   color: var(--color-muted);
