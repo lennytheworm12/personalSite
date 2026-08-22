@@ -1,5 +1,50 @@
 # Decisions and Blockers Log
 
+## Phase 1 closeout / Phase 2 kickoff resolutions (2026-08-22)
+
+### R1 — Canonical Obsidian notes: still unavailable (B1 updated)
+
+The Phase 2 goal brief asserts the canonical notes ("Concept and Plan",
+"Technical Design", "OpenCode Phase 1 Design", "OpenCode Phase 2 Design")
+are available as product source of truth. **Repository/vault evidence shows
+they are not present** — the vault contains only the progress log written
+during Goal 1. This discrepancy is recorded rather than silently resolved:
+the Phase 2 goal brief itself (which embeds a detailed M0–M12 specification
+with acceptance criteria and an out-of-scope stop list) is treated as the
+operative Phase 2 design. Historical entries below are preserved unchanged;
+nothing is rewritten to pretend the notes were ever available.
+
+### R2 — LeetCode deferred (accepted)
+
+No LeetCode fetching, snapshots, validation, graph node, or progress UI in
+Phase 2 or later until explicitly revived. No LeetCode data appears in any
+schema.
+
+### R3 — Provisional project content allowed (accepted)
+
+Case-study fields (motivation, contribution, technology purpose, concepts,
+evidence, challenges, outcomes, next steps) may carry clearly labeled
+draft/provisional text until a dedicated content-audit pass. The schema
+models this with an explicit `provisional` flag so provisional text is
+never mistaken for verified fact.
+
+### R4 — Do not fabricate evidence (standing rule)
+
+Metrics, testimonials, URLs, credentials, outcomes, user counts, and
+performance figures are never invented. Quantitative evidence stays empty
+and listed as unresolved until real data exists.
+
+### R5 — Empty project memories are valid (accepted)
+
+`memories: []` must validate. No fake images, stories, or placeholder
+people are created to satisfy the schema.
+
+### R6 — GitHub Pages is the active development deployment target (accepted)
+
+Verified main revisions deploy to GitHub Pages under `/personalSite/`.
+Support for `DEPLOY_BASE_PATH`, `SITE_PUBLIC_URL`, and future root/custom
+domain deployment without architectural rewrite is preserved (see D5).
+
 ## Decisions
 
 ### D1 — Operative specification source (2026-08-22)
@@ -35,23 +80,26 @@ for a subpath (`/personalSite/`) or a root domain without code changes.
 
 ## Blockers
 
-### B1 — Canonical design notes missing
+### B1 — Canonical design notes missing (RESOLVED as R1)
 
-The three referenced Obsidian notes do not exist in the vault. Needed from
-user: restore/sync the vault or confirm the Goal 1 brief alone is
-authoritative. Does not block implementation of the stated requirements.
+~~The three referenced Obsidian notes do not exist in the vault.~~
+Resolution: still absent at Phase 2 kickoff; the Phase 2 goal brief is
+treated as authoritative per R1. If the notes are recovered later,
+reconcile against the shipped implementation before Phase 3 design.
 
-### B2 — No Git remote configured yet (expected)
+### B2 — No Git remote configured yet (RESOLVED)
 
-A remote must be supplied by the user (e.g. `gh repo create …`) before push
-and CI can run. All local equivalents of CI jobs are reproduced locally.
+~~A remote must be supplied by the user before push and CI can run.~~
+Resolved during Goal 1 closeout: remote `lennytheworm12/personalSite`,
+CI green, GitHub Pages deployment live.
 
-### B3 — Deployment credentials unavailable (expected)
+### B3 — Deployment credentials unavailable (RESOLVED)
 
-Cloudflare Pages deployment requires user account/API token. Local work
-includes hosting configuration + docs so deployment is a single manual step.
+~~Cloudflare Pages deployment requires user account/API token.~~ Resolved:
+GitHub Pages is the active development target (R6).
 
-### B4 — Personal content unresolved by design
+### B4 — Personal content unresolved by design (OPEN, narrowed by R3/R4)
 
-All personal facts, metrics, links, handles, résumé URL etc. are marked
-unresolved placeholders. User decisions required before public launch.
+All personal facts and quantitative evidence remain unresolved placeholders.
+Provisional _qualitative_ draft text is now allowed per R3; fabrication of
+evidence remains forbidden per R4. User decisions required before launch.
