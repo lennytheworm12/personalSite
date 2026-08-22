@@ -15,7 +15,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "verify:content": "tsx scripts/verify-content.ts",
-    "test:e2e": "playwright test",
+    "test:e2e": "astro preview stop > /dev/null 2>&1 || true; (astro preview --host 127.0.0.1 --port 4321 --strictPort > /tmp/portfolio-preview.log 2>&1 &); until curl -sf http://127.0.0.1:4321/ > /dev/null; do sleep 0.5; done; playwright test",
     "verify:build": "tsx scripts/verify-build.ts",
     "verify": "pnpm format:check && pnpm lint && pnpm check && pnpm verify:content && pnpm test && pnpm build && pnpm verify:build && pnpm test:e2e"
   },

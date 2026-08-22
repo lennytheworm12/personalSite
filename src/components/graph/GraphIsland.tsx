@@ -77,8 +77,13 @@ export default function GraphIsland({
   };
 
   return (
+    // Escape handling lives here so it works from any focused node via
+    // bubbling; the island itself exposes no direct interaction target.
+    /* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- container only listens for bubbled Escape from native buttons */
     <div
       className="graph-island"
+      role="group"
+      aria-label="Interactive project graph"
       data-viewport={viewport}
       onKeyDown={(event) => {
         if (event.key === "Escape") {
