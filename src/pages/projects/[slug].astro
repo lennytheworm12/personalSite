@@ -1,0 +1,111 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import UnresolvedList from "@/components/UnresolvedList.astro";
+import { buildMetadata } from "@/lib/metadata";
+import { projects } from "@/content/projects";
+
+export function getStaticPaths() {
+  return projects.map((project) => ({
+    params: { slug: project.slug },
+    props: { project },
+  }));
+}
+
+const { project } = Astro.props;
+
+const metadata = buildMetadata({
+  title: project.title,
+  description: project.tagline,
+  path: `/projects/${project.slug}/`,
+});
+---
+
+<BaseLayout metadata={metadata} currentPath={`/projects/${project.slug}/`}>
+  <article>
+    <header>
+      <h1>{project.title}</h1>
+      <p>{project.tagline}</p>
+      {
+        project.status === "placeholder" && (
+          <p>
+            <span class="badge">Placeholder case study</span>
+          </p>
+        )
+      }
+    </header>
+
+    <section aria-labelledby="summary-heading">
+      <h2 id="summary-heading">Summary</h2>
+      <p>{project.summary}</p>
+    </section>
+
+    {
+      project.contributions.length > 0 && (
+        <section aria-labelledby="contributions-heading">
+          <h2 id="contributions-heading">Contributions</h2>
+          <ul>
+            {project.contributions.map((contribution) => (
+              <li>{contribution}</li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    {
+      project.technologies.length > 0 && (
+        <section aria-labelledby="technologies-heading">
+          <h2 id="technologies-heading">Technologies</h2>
+          <ul>
+            {project.technologies.map((technology) => (
+              <li>{technology}</li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    {
+      project.metrics.length > 0 && (
+        <section aria-labelledby="metrics-heading">
+          <h2 id="metrics-heading">Metrics</h2>
+          <dl>
+            {project.metrics.map((metric) => (
+              <>
+                <dt>{metric.label}</dt>
+                <dd>
+                  {metric.value}
+                  {metric.unit ? ` ${metric.unit}` : ""}
+                </dd>
+              </>
+            ))}
+          </dl>
+        </section>
+      )
+    }
+
+    <UnresolvedList unresolved={project.unresolved} />
+
+    {
+      project.links.length > 0 && (
+        <section aria-labelledby="links-heading">
+          <h2 id="links-heading">Links</h2>
+          <ul>
+            {project.links.map((link) => (
+              <li>
+                <a
+                  href={link.url}
+                  rel={link.role === "other" ? undefined : "noopener noreferrer"}
+                >
+                  {link.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+  </article>
+
+  <p><a href="/">← Back to home</a></p>
+</BaseLayout>

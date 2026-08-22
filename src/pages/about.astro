@@ -1,0 +1,36 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { buildMetadata } from "@/lib/metadata";
+
+const metadata = buildMetadata({
+  title: "About",
+  path: "/about",
+});
+---
+
+<BaseLayout metadata={metadata} currentPath="/about/">
+  <h1>About</h1>
+
+  <section aria-labelledby="bio-heading">
+    <h2 id="bio-heading">Bio</h2>
+    <p>
+      This biography is an honest placeholder. The detailed story of who Bi Phan is, the
+      work they do, and what they are looking for has not been written yet.
+    </p>
+    <p class="placeholder-note">
+      Unresolved: professional summary, career history, location, pronouns, photo.
+    </p>
+  </section>
+
+  <section aria-labelledby="now-heading">
+    <h2 id="now-heading">What I'm working on</h2>
+    <p>
+      Two projects are currently being documented on this site:
+      <a href="/projects/spotify-sorter/">Spotify Sorter</a> and
+      <a href="/projects/game-teacher/">Game Teacher</a>. Their case studies will grow
+      as confirmed facts replace placeholders.
+    </p>
+  </section>
+
+  <p><a href="/">← Back to home</a></p>
+</BaseLayout>

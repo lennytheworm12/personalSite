@@ -1,0 +1,24 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { buildMetadata } from "@/lib/metadata";
+
+const metadata = buildMetadata({
+  title: "Page not found",
+  description: "This page does not exist on the portfolio site.",
+  path: "/404",
+});
+---
+
+<BaseLayout metadata={metadata} currentPath="">
+  <h1>Page not found</h1>
+  <p>
+    The page you asked for does not exist on this site. It may have moved, or the
+    address may be mistyped.
+  </p>
+  <p>
+    You can start again from the <a href="/">home page</a>, browse
+    <a href="/projects/spotify-sorter/">Spotify Sorter</a> or
+    <a href="/projects/game-teacher/">Game Teacher</a>, or read
+    <a href="/about/">the About page</a>.
+  </p>
+</BaseLayout>

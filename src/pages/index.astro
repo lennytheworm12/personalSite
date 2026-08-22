@@ -1,0 +1,73 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { buildMetadata } from "@/lib/metadata";
+import { projects } from "@/content/projects";
+import { ProjectCard } from "@/components/ProjectCard";
+
+const metadata = buildMetadata({
+  title: "Home",
+  description:
+    "Portfolio of Bi Phan: software projects including Spotify Sorter and Game Teacher.",
+  path: "/",
+});
+
+interface ContactPlaceholder {
+  id: string;
+  label: string;
+  note: string;
+  href?: string;
+}
+
+/**
+ * Stable contact placeholders. Personal handles and URLs are unresolved
+ * facts (see docs/decisions-log.md B4): they are rendered as plain text
+ * until confirmed values exist — never invented.
+ */
+const contacts = [
+  { id: "contact-about", label: "About", note: "See the About page.", href: "/about/" },
+  { id: "contact-github", label: "GitHub", note: "Profile URL not yet published." },
+  { id: "contact-linkedin", label: "LinkedIn", note: "Profile URL not yet published." },
+  { id: "contact-resume", label: "Résumé", note: "Résumé file not yet published." },
+  { id: "contact-email", label: "Contact", note: "Email address not yet published." },
+  { id: "contact-leetcode", label: "LeetCode", note: "Profile URL not yet published." },
+] satisfies ContactPlaceholder[];
+---
+
+<BaseLayout metadata={metadata} currentPath="/">
+  <h1>Bi Phan</h1>
+  <p>
+    Software engineer. This site is an honest, work-in-progress portfolio: every case
+    study below is real, and anything not yet written is marked as a placeholder rather
+    than invented.
+  </p>
+
+  <section aria-labelledby="projects-heading">
+    <h2 id="projects-heading">Projects</h2>
+    <ul class="project-list">
+      {projects.map((project) => <ProjectCard project={project} />)}
+    </ul>
+  </section>
+
+  <section aria-labelledby="contact-heading">
+    <h2 id="contact-heading">Find me</h2>
+    <ul class="contact-list">
+      {
+        contacts.map((contact) => (
+          <li id={contact.id}>
+            {contact.href ? (
+              <>
+                <strong>{contact.label}:</strong>{" "}
+                <a href={contact.href}>{contact.note}</a>
+              </>
+            ) : (
+              <>
+                <strong>{contact.label}:</strong>{" "}
+                <span class="placeholder-note">{contact.note}</span>
+              </>
+            )}
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</BaseLayout>

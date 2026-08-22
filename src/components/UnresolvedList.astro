@@ -1,0 +1,24 @@
+---
+interface Props {
+  unresolved: readonly string[];
+}
+
+const items = Astro.props.unresolved;
+---
+
+<section aria-label="Not yet documented">
+  <h3>Not yet documented</h3>
+  <p class="placeholder-note">
+    The following facts about this project are intentionally left blank until they can
+    be confirmed:
+  </p>
+  <ul class="unresolved-list">
+    {
+      items.map((item) => (
+        <li>
+          <code>{item}</code>
+        </li>
+      ))
+    }
+  </ul>
+</section>
