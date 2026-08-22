@@ -1,6 +1,7 @@
 # Progress Log
 
 ## 2026-08-22 — Goal 1 kickoff
+
 - Inspected environment: Node v24.12.0, npm 11.6.2, pnpm 10.26.2,
   git 2.34.1, Playwright CLI 1.62.1 available.
 - Working directory was empty; initialized Git repo on `main`.
@@ -9,6 +10,7 @@
   decisions/blockers log.
 
 ## 2026-08-22 — M2–M8 implemented
+
 - Scaffolded Astro 7 (`output: 'static'`) with React integration used for
   server-rendered components only; zero client-side JavaScript shipped.
 - Content model: Zod schema (`src/content/project-schema.ts`) with kebab-case
@@ -26,6 +28,7 @@
   `verify-content` and `verify-build` gates, GitHub Actions CI.
 
 ### Issues hit and fixed
+
 - Zod 4 `z.url()` returns a string — https check now parses via `new URL`.
 - TypeScript 7 (native) unsupported by typescript-eslint → pinned TS 6.0.3;
   removed deprecated `baseUrl` option accordingly.
@@ -36,6 +39,7 @@
   dist must be rebuilt before e2e (preview serves stale output otherwise).
 
 ## 2026-08-22 — Full verification (clean install)
+
 - `rm -rf node_modules dist .astro && pnpm install --frozen-lockfile` ✓
 - `pnpm verify` (format:check → lint → astro check+tsc → verify:content →
   vitest 29/29 → build → verify:build → playwright 160/160) ✓
