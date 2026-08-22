@@ -87,7 +87,9 @@ for (const url of chunkUrls) {
   // from the _astro segment so verification works at any base path.
   const astroIndex = url.indexOf("_astro/");
   if (astroIndex === -1) continue;
-  const filePath = join(DIST, decodeURI(url.split("?", 1)[0] ?? url));
+  const withoutQuery = url.slice(astroIndex).split("?", 1)[0];
+  if (!withoutQuery) continue;
+  const filePath = join(DIST, decodeURI(withoutQuery));
   try {
     const raw = readFileSync(filePath);
     jsRawTotal += raw.byteLength;

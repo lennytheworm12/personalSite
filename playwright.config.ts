@@ -16,7 +16,9 @@ export default defineConfig({
   webServer: {
     command: "pnpm preview --host 127.0.0.1 --port 4321 --strictPort",
     url: `${baseURL}/`,
-    reuseExistingServer: !process.env.CI,
+    // The test:e2e script manages the (backgrounded) Astro preview server
+    // itself, so always reuse whatever is listening on the port.
+    reuseExistingServer: true,
     timeout: 60_000,
   },
   projects: [
