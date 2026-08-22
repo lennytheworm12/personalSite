@@ -47,6 +47,7 @@
   64 KiB). Secret scan over all emitted files: clean.
 
 ## 2026-08-22 — Pushed to GitHub; CI green; GitHub Pages wired up
+
 - Integrated remote's initial commit (MIT LICENSE + README stub) via
   rebase — LICENSE preserved; README conflict resolved in favor of ours.
 - Fixed a real CI catch: two docs files committed post-format failed
