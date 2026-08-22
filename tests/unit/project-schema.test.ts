@@ -78,7 +78,9 @@ describe("parseProjectRecord — positive", () => {
     const parsed = parseProjectRecord({
       ...validRecord,
       motivation: { text: "DRAFT text.", provisional: true },
-      unresolved: validRecord.unresolved.filter((name) => name !== "motivation"),
+      unresolved: (validRecord.unresolved ?? []).filter(
+        (name) => name !== "motivation",
+      ),
     });
     expect(parsed.motivation?.provisional).toBe(true);
   });

@@ -58,6 +58,7 @@ describe("authored layouts", () => {
   it("keeps the person node inside the center-safe region", () => {
     for (const preset of Object.values(HOME_LAYOUTS)) {
       const p = preset.nodes["person:bi"];
+      if (!p) throw new Error(`person:bi missing from ${preset.viewport}`);
       expect(p.x).toBeGreaterThanOrEqual(40);
       expect(p.x).toBeLessThanOrEqual(60);
       expect(p.y).toBeGreaterThanOrEqual(35);

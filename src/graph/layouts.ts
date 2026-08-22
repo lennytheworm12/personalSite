@@ -1,5 +1,7 @@
 import type { HomeGraph, LayoutViewport } from "./graph-schema";
 
+export type { LayoutViewport };
+
 /**
  * Authored graph layouts (Phase 2). Coordinates are hand-curated in a
  * normalized 0–100 logical space (x grows right, y grows down). No force

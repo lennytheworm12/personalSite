@@ -26,6 +26,17 @@
   box-sizing: border-box;
 }
 
+/* Reduced motion: highlights become instant; all information is preserved. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
 html {
   font-family: var(--font-sans);
   line-height: 1.6;
@@ -196,4 +207,183 @@ a {
   main {
     padding: 2.5rem 1rem 4rem;
   }
+}
+
+/* ============================================================
+   Graph (Phase 2) — grayscale semantic tokens
+   ============================================================ */
+
+:root {
+  --graph-bg: var(--color-surface);
+  --graph-node-surface: #ffffff;
+  --graph-node-border: #6b7280;
+  --graph-text: var(--color-text);
+  --graph-muted: var(--color-muted);
+  --graph-edge: #9ca3af;
+  --graph-edge-active: #111827;
+  --graph-focus: var(--color-accent);
+  --graph-pinned-ring: #374151;
+  --z-graph-edges: 1;
+  --z-graph-nodes: 2;
+  --z-graph-details: 3;
+  --graph-node-person: 7.5rem;
+  --graph-node-project: 6rem;
+  --graph-node-story: 4.25rem;
+  --graph-node-tech: 3.5rem;
+  --graph-transition-fast: 120ms;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --graph-node-surface: #232833;
+    --graph-node-border: #8b93a3;
+    --graph-edge: #4b5563;
+    --graph-edge-active: #e6e8ee;
+    --graph-pinned-ring: #cbd2dd;
+  }
+}
+
+.graph-region {
+  margin-bottom: 2.5rem;
+}
+
+.graph-instructions {
+  color: var(--graph-muted);
+}
+
+/* The desktop graph is hidden on narrow screens; the Index is primary there. */
+@media (max-width: 47.99em) {
+  .graph-region .graph-island {
+    display: none;
+  }
+}
+
+.graph-island {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--graph-bg);
+}
+
+.graph-canvas {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  min-height: 320px;
+}
+
+.graph-edges {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: var(--z-graph-edges);
+  pointer-events: none;
+}
+
+.graph-edge {
+  stroke: var(--graph-edge);
+  vector-effect: non-scaling-stroke;
+  stroke-width: 1.5px;
+  stroke-dasharray: 4 3;
+  transition:
+    stroke var(--graph-transition-fast) ease,
+    stroke-width var(--graph-transition-fast) ease,
+    stroke-dasharray var(--graph-transition-fast) ease;
+}
+
+.graph-edge-active {
+  stroke: var(--graph-edge-active);
+  stroke-width: 3px;
+  stroke-dasharray: none;
+}
+
+.graph-edge-secondary {
+  stroke-width: 2px;
+}
+
+.graph-nodes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-graph-nodes);
+}
+
+.graph-node-slot {
+  position: absolute;
+  transform: translate(-50%, -50%);
+}
+
+.graph-node {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  width: var(--node-size, var(--graph-node-tech));
+  height: var(--node-size, var(--graph-node-tech));
+  padding: 0.35rem;
+  border-radius: 999px;
+  border: 2px solid var(--graph-node-border);
+  background: var(--graph-node-surface);
+  color: var(--graph-text);
+  font-size: 0.72rem;
+  line-height: 1.15;
+  cursor: pointer;
+  transition:
+    opacity var(--graph-transition-fast) ease,
+    box-shadow var(--graph-transition-fast) ease;
+}
+
+.graph-node-person {
+  --node-size: var(--graph-node-person);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.graph-node-project {
+  --node-size: var(--graph-node-project);
+  font-size: 0.85rem;
+  font-weight: 650;
+}
+
+.graph-node-story {
+  --node-size: var(--graph-node-story);
+  font-weight: 500;
+}
+
+.graph-node-dimmed {
+  opacity: 0.45;
+}
+
+.graph-node:focus-visible {
+  outline: 3px solid var(--graph-focus);
+  outline-offset: 3px;
+}
+
+.graph-node[aria-pressed="true"] {
+  box-shadow: 0 0 0 4px var(--graph-pinned-ring);
+}
+
+.graph-details {
+  border-top: 1px solid var(--color-border);
+  padding: 0.75rem 1rem 1rem;
+  background: var(--graph-bg);
+  border-radius: 0 0 8px 8px;
+}
+
+.graph-details-title {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+}
+
+.graph-details-kind {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  margin: 0 0 0.35rem;
+}
+
+.graph-details p {
+  margin: 0.25rem 0;
 }

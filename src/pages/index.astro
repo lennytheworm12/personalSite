@@ -3,6 +3,9 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 import { buildMetadata } from "@/lib/metadata";
 import { withBase } from "@/lib/base-path";
 import { projects } from "@/content/projects";
+import { homeGraph } from "@/graph/graph-data";
+import { HOME_LAYOUTS, SSR_DEFAULT_VIEWPORT } from "@/graph/layouts";
+import GraphIsland from "@/components/graph/GraphIsland";
 import { ProjectCard } from "@/components/ProjectCard";
 
 const metadata = buildMetadata({
@@ -12,38 +15,64 @@ const metadata = buildMetadata({
   path: "/",
 });
 
-interface ContactPlaceholder {
-  id: string;
-  label: string;
-  note: string;
-  href?: string;
-}
-
 /**
  * Stable contact placeholders. Personal handles and URLs are unresolved
  * facts (see docs/decisions-log.md B4): they are rendered as plain text
  * until confirmed values exist — never invented.
  */
 const contacts = [
-  { id: "contact-about", label: "About", note: "See the About page.", href: "/about/" },
+  {
+    id: "contact-about",
+    label: "About",
+    note: "See the About page.",
+    href: withBase("/about/"),
+  },
   { id: "contact-github", label: "GitHub", note: "Profile URL not yet published." },
   { id: "contact-linkedin", label: "LinkedIn", note: "Profile URL not yet published." },
   { id: "contact-resume", label: "Résumé", note: "Résumé file not yet published." },
   { id: "contact-email", label: "Contact", note: "Email address not yet published." },
-  { id: "contact-leetcode", label: "LeetCode", note: "Profile URL not yet published." },
 ] satisfies ContactPlaceholder[];
+
+interface ContactPlaceholder {
+  id: string;
+  label: string;
+  note: string;
+  href?: string;
+}
 ---
 
 <BaseLayout metadata={metadata} currentPath="/">
   <h1>Bi Phan</h1>
   <p>
     Software engineer. This site is an honest, work-in-progress portfolio: every case
-    study below is real, and anything not yet written is marked as a placeholder rather
-    than invented.
+    study is real, and anything not yet written is marked as a placeholder rather than
+    invented.
   </p>
 
-  <section aria-labelledby="projects-heading">
-    <h2 id="projects-heading">Projects</h2>
+  <section class="graph-region" aria-labelledby="graph-heading">
+    <h2 id="graph-heading">Project graph</h2>
+    <p class="graph-instructions">
+      A visual map of Bi Phan's projects (circles marked by size), why they exist, and
+      the technologies inside them. Hover a circle or move keyboard focus to read about
+      it below the map; press Enter to pin it and Escape to unpin. Prefer plain lists?{
+        " "
+      }
+      <a href="#project-index">Jump to the project index</a>.
+    </p>
+    <GraphIsland
+      client:load
+      graph={homeGraph}
+      layouts={HOME_LAYOUTS}
+      ssrViewport={SSR_DEFAULT_VIEWPORT}
+    />
+    <p class="graph-instructions">
+      The same information is available as text in the{" "}
+      <a href={withBase("#project-index")}>project index</a> below.
+    </p>
+  </section>
+
+  <section aria-labelledby="project-index-heading" id="project-index">
+    <h2 id="project-index-heading">Project index</h2>
     <ul class="project-list">
       {projects.map((project) => <ProjectCard project={project} />)}
     </ul>
@@ -58,7 +87,7 @@ const contacts = [
             {contact.href ? (
               <>
                 <strong>{contact.label}:</strong>{" "}
-                <a href={withBase(contact.href)}>{contact.note}</a>
+                <a href={contact.href}>{contact.note}</a>
               </>
             ) : (
               <>

@@ -93,13 +93,16 @@ export function validateLayouts(
     const primaryNodes = graph.nodes.filter((node) => node.priority === 1);
     for (let i = 0; i < primaryNodes.length; i++) {
       for (let j = i + 1; j < primaryNodes.length; j++) {
-        const a = layout.nodes[primaryNodes[i].id];
-        const b = layout.nodes[primaryNodes[j].id];
+        const nodeA = primaryNodes[i];
+        const nodeB = primaryNodes[j];
+        if (!nodeA || !nodeB) continue;
+        const a: Point | undefined = layout.nodes[nodeA.id];
+        const b: Point | undefined = layout.nodes[nodeB.id];
         if (!a || !b) continue;
         const d = distance(a, b);
         if (d < minSpacing) {
           problems.push(
-            `priority-1 spacing violation in ${viewport}: ${primaryNodes[i].id} ↔ ${primaryNodes[j].id} = ${d.toFixed(1)} < ${minSpacing}`,
+            `priority-1 spacing violation in ${viewport}: ${nodeA.id} ↔ ${nodeB.id} = ${d.toFixed(1)} < ${minSpacing}`,
           );
         }
       }
@@ -118,9 +121,7 @@ export function validateLayouts(
         const a: Point | undefined = layout.nodes[idA];
         const b: Point | undefined = layout.nodes[idB];
         if (a && b && distance(a, b) < 10) {
-          problems.push(
-            `projects too close together in ${viewport}: ${idA} ↔ ${idB}`
-          );
+          problems.push(`projects too close together in ${viewport}: ${idA} ↔ ${idB}`);
         }
       }
     }

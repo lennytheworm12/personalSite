@@ -110,10 +110,12 @@ describe("buildHomeGraph — determinism and structure", () => {
   it("surfaces validation failures as GraphValidationError", () => {
     // Simulate a corrupted graph reaching the validator directly.
     const built = buildHomeGraph({ profile, projects: [spotify] });
+    const firstNode = built.graph.nodes[0];
+    if (!firstNode) throw new Error("expected at least one node");
     expect(() =>
       validateHomeGraph(
         {
-          nodes: [...built.graph.nodes, built.graph.nodes[0]],
+          nodes: [...built.graph.nodes, firstNode],
           edges: built.graph.edges,
         },
         { featuredSlugs: ["spotify-sorter"], caseStudyHrefBySlug: {} },
