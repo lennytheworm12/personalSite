@@ -1,6 +1,9 @@
 import { expect, test } from "@playwright/test";
 
-test.skip(({ viewport }) => viewport.width < 900, "graph is hidden on small screens");
+test.skip(
+  ({ viewport }) => (viewport?.width ?? 0) < 900,
+  "graph is hidden on small screens",
+);
 
 const GRAPH_NODES = [
   "person:bi",

@@ -77,7 +77,7 @@ const homeHtml = readFileSync(join(DIST, "index.html"), "utf8");
 const chunkUrls = new Set<string>();
 // Matches src/href attributes AND astro-island component-url/renderer-url.
 for (const match of homeHtml.matchAll(/[\w-]+="([^"]*_astro\/[^"]*\.js[^"]*)"/g)) {
-  chunkUrls.add(match[1]);
+  if (match[1]) chunkUrls.add(match[1]);
 }
 let jsRawTotal = 0;
 let jsGzipTotal = 0;
@@ -87,7 +87,7 @@ for (const url of chunkUrls) {
   // from the _astro segment so verification works at any base path.
   const astroIndex = url.indexOf("_astro/");
   if (astroIndex === -1) continue;
-  const filePath = join(DIST, decodeURI(url.slice(astroIndex)).split("?")[0]);
+  const filePath = join(DIST, decodeURI(url.split("?", 1)[0] ?? url));
   try {
     const raw = readFileSync(filePath);
     jsRawTotal += raw.byteLength;

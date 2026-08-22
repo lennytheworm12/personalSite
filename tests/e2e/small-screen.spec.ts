@@ -2,7 +2,10 @@ import { expect, test } from "@playwright/test";
 
 test.describe("small-screen fallback (graph hidden, Index primary)", () => {
   test("the graph island is not visible and causes no overflow", async ({ page }) => {
-    test.skip(page.viewportSize() === null || page.viewportSize().width >= 900);
+    test.skip(
+      page.viewportSize() === null ||
+        (page.viewportSize()?.width ?? Number.POSITIVE_INFINITY) >= 900,
+    );
     await page.goto("/");
     await expect(page.locator(".graph-island")).toBeHidden();
     const overflow = await page.evaluate(
@@ -14,7 +17,10 @@ test.describe("small-screen fallback (graph hidden, Index primary)", () => {
   test("Index remains primary: projects reachable with usable touch targets", async ({
     page,
   }) => {
-    test.skip(page.viewportSize() === null || page.viewportSize().width >= 900);
+    test.skip(
+      page.viewportSize() === null ||
+        (page.viewportSize()?.width ?? Number.POSITIVE_INFINITY) >= 900,
+    );
     await page.goto("/");
     const link = page
       .locator(".project-list")
@@ -27,7 +33,10 @@ test.describe("small-screen fallback (graph hidden, Index primary)", () => {
   });
 
   test("identity and contact placeholders remain visible", async ({ page }) => {
-    test.skip(page.viewportSize() === null || page.viewportSize().width >= 900);
+    test.skip(
+      page.viewportSize() === null ||
+        (page.viewportSize()?.width ?? Number.POSITIVE_INFINITY) >= 900,
+    );
     await page.goto("/");
     await expect(
       page.getByRole("heading", { level: 1, name: "Bi Phan" }),
