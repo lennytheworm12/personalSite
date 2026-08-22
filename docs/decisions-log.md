@@ -103,3 +103,11 @@ GitHub Pages is the active development target (R6).
 All personal facts and quantitative evidence remain unresolved placeholders.
 Provisional _qualitative_ draft text is now allowed per R3; fabrication of
 evidence remains forbidden per R4. User decisions required before launch.
+
+### D7 — Stable-last-hover interaction (2026-08-22)
+
+Clearing hover on mouseleave made detail-region links detach while the
+pointer traveled toward them (caught by Firefox timing in e2e). Hover now
+persists until another node is hovered/focused or Escape is pressed; pinning
+(Enter/Space/click) remains the explicit way to freeze details. Phase 3 may
+refine this with hover-intent delays.

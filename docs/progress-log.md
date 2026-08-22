@@ -62,3 +62,31 @@
   upload → deploy-pages. Pages enabled via API (`build_type=workflow`).
 - Full local suite re-run green: format ✓ lint ✓ types ✓ content ✓
   unit/integration 35/35 ✓ build ✓ build-gate ✓ e2e 160/160 ✓.
+
+## 2026-08-22 — Phase 2 implemented (M0–M11)
+
+- M0: closeout decisions recorded (R1–R6); blockers reconciled. Canonical
+  notes still absent from the vault; goal brief treated as authoritative.
+- M1: content model migrated to graph-ready contract (structured
+  technologies with ids/verification, provisional narrative sections,
+  aliases/featured/motionStyle/concepts/memories). Case studies render
+  ten durable sections.
+- M2: `src/graph/` domain model + deterministic builder + validation.
+  Shipped graph: 8 nodes (1 person, 2 project, 2 story, 3 technology),
+  9 edges (2 ownership, 2 motivation, 5 technology). Shared TypeScript/
+  React collapse into single tech nodes.
+- M3: authored wide/laptop layouts; validator enforces coverage, bounds,
+  center region, priority-1 spacing ≥18 units, distinct projects.
+- M4–M7: GraphIsland (client:load) hydrates SSR'd meaningful markup;
+  DOM buttons + SVG edges; hover/focus/pin state machine; stable aria-live
+  detail region with base-safe links; Index preserved below graph;
+  island hidden <48em where Index is primary.
+- Interaction finding D7: pointer travel from node to detail region
+  detaches links if hover clears on leave → stable-last-hover semantics,
+  cleared by Escape. Pinning exists precisely for stable traversal.
+- M9: verify-build now enforces script containment (homepage only),
+  measures JS budgets: homepage JS = 57.9 KiB gzip / 184.8 KiB raw,
+  2 chunks (React client + GraphIsland), homepage HTML ≈18 KiB,
+  dist ≈227 KiB. Well under the 200 KiB hard ceiling.
+- M10/M11: 76 unit/integration tests + 196 browser assertions green from
+  a clean install; base-path production build verified separately.

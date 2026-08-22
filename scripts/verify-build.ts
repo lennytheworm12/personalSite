@@ -83,8 +83,11 @@ let jsRawTotal = 0;
 let jsGzipTotal = 0;
 let chunkCount = 0;
 for (const url of chunkUrls) {
-  // URLs are root-relative in the built HTML; resolve against dist root.
-  const filePath = join(DIST, url.replace(/^([^?#]*).*$/, "$1").replace(/^\/+/, ""));
+  // URLs may carry a deploy base (e.g. /personalSite/_astro/x.js); resolve
+  // from the _astro segment so verification works at any base path.
+  const astroIndex = url.indexOf("_astro/");
+  if (astroIndex === -1) continue;
+  const filePath = join(DIST, decodeURI(url.slice(astroIndex)).split("?")[0]);
   try {
     const raw = readFileSync(filePath);
     jsRawTotal += raw.byteLength;
