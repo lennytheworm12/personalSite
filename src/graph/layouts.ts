@@ -49,6 +49,10 @@ export const WIDE_LAYOUT: HomeLayoutPreset = {
     "tech:typescript": { x: 50, y: 78 },
     "tech:react": { x: 24, y: 82 },
     "tech:web-audio-api": { x: 12, y: 42 },
+    "concept:music-organization": { x: 20, y: 52 },
+    "concept:playlist-curation": { x: 36, y: 62 },
+    "concept:game-design": { x: 64, y: 56 },
+    "concept:teaching": { x: 80, y: 48 },
   },
 };
 
@@ -63,6 +67,10 @@ export const LAPTOP_LAYOUT: HomeLayoutPreset = {
     "tech:typescript": { x: 52, y: 76 },
     "tech:react": { x: 28, y: 80 },
     "tech:web-audio-api": { x: 14, y: 38 },
+    "concept:music-organization": { x: 22, y: 50 },
+    "concept:playlist-curation": { x: 38, y: 60 },
+    "concept:game-design": { x: 62, y: 54 },
+    "concept:teaching": { x: 78, y: 46 },
   },
 };
 

@@ -3,9 +3,26 @@ import { homeGraph } from "@/graph/graph-data";
 import { FEATURED_PROJECT_SLUGS } from "@/content/projects";
 
 describe("shipped home graph integration", () => {
-  it("contains person, project, story, and technology nodes", () => {
+  it("contains person, project, story, technology, and concept nodes", () => {
     const kinds = new Set(homeGraph.nodes.map((n) => n.kind));
-    expect(kinds).toEqual(new Set(["person", "project", "story", "technology"]));
+    expect(kinds).toEqual(
+      new Set(["person", "project", "story", "technology", "concept"]),
+    );
+  });
+
+  it("derives concept nodes from shared project concepts with deduplication", () => {
+    const conceptIds = homeGraph.nodes
+      .filter((n) => n.kind === "concept")
+      .map((n) => n.id)
+      .sort();
+    expect(conceptIds).toEqual([
+      "concept:game-design",
+      "concept:music-organization",
+      "concept:playlist-curation",
+      "concept:teaching",
+    ]);
+    const conceptEdgeTargets = homeGraph.edges.filter((e) => e.kind === "concept");
+    expect(conceptEdgeTargets).toHaveLength(4);
   });
 
   it("represents every featured project as a project node", () => {

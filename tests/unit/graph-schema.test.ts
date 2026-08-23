@@ -257,3 +257,57 @@ describe("validateHomeGraph — rejection cases", () => {
     ).toThrow(/project with no person ownership edge: project:second/);
   });
 });
+
+describe("concept nodes and edges", () => {
+  const conceptA: GraphNode = {
+    id: "concept:music",
+    kind: "concept",
+    label: "Music organization",
+    detail: "Explored through Test Project.",
+    priority: 3,
+  };
+  const conceptEdge: GraphEdge = {
+    id: edgeId("concept", "project:test-project", "concept:music"),
+    kind: "concept",
+    source: "project:test-project",
+    target: "concept:music",
+  };
+  const conceptGraph: HomeGraph = {
+    nodes: [person, project(), story, tech, conceptA],
+    edges: [ownershipEdge, motivationEdge, technologyEdge, conceptEdge],
+  };
+
+  it("accepts a valid concept graph", () => {
+    expect(() => validateHomeGraph(conceptGraph, context)).not.toThrow();
+  });
+
+  it("rejects an orphaned concept node", () => {
+    const orphan = { ...conceptA, id: "concept:orphan" };
+    expect(() =>
+      validateHomeGraph(
+        { ...conceptGraph, nodes: [...conceptGraph.nodes, orphan] },
+        context,
+      ),
+    ).toThrow(/orphaned concept node: concept:orphan/);
+  });
+
+  it("rejects a malformed concept edge (person -> concept)", () => {
+    expect(() =>
+      validateHomeGraph(
+        {
+          ...conceptGraph,
+          edges: [
+            ...conceptGraph.edges,
+            {
+              id: edgeId("concept", "person:test", "concept:music"),
+              kind: "concept",
+              source: "person:test",
+              target: "concept:music",
+            },
+          ],
+        },
+        context,
+      ),
+    ).toThrow(/malformed concept edge/);
+  });
+});

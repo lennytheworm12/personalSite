@@ -8,8 +8,19 @@ import { z } from "zod";
  * deliberately absent here (see docs/decisions-log.md R2).
  */
 
-export const NODE_KIND_VALUES = ["person", "project", "story", "technology"] as const;
-export const EDGE_KIND_VALUES = ["ownership", "motivation", "technology"] as const;
+export const NODE_KIND_VALUES = [
+  "person",
+  "project",
+  "story",
+  "technology",
+  "concept",
+] as const;
+export const EDGE_KIND_VALUES = [
+  "ownership",
+  "motivation",
+  "technology",
+  "concept",
+] as const;
 export const LAYOUT_VIEWPORTS = ["wide", "laptop"] as const;
 
 export type NodeKind = (typeof NODE_KIND_VALUES)[number];
@@ -144,6 +155,31 @@ export function validateHomeGraph(
     );
     if (!owned) {
       problems.push(`story node with no owning project relationship: ${node.id}`);
+    }
+  }
+
+  // Concept edges must connect projects to concept nodes; every concept node
+  // must be reachable from at least one project (no orphans).
+  for (const edge of edgesById.values()) {
+    if (edge.kind !== "concept") continue;
+    const sourceKind = nodesById.get(edge.source)?.kind;
+    const targetKind = nodesById.get(edge.target)?.kind;
+    if (sourceKind !== "project" || targetKind !== "concept") {
+      problems.push(
+        `malformed concept edge ${edge.id}: expected project -> concept, got ${sourceKind ?? "unknown"} -> ${targetKind ?? "unknown"}`,
+      );
+    }
+  }
+  for (const node of nodesById.values()) {
+    if (node.kind !== "concept") continue;
+    if (node.label.trim() === "") {
+      problems.push(`concept node with empty label: ${node.id}`);
+    }
+    const referenced = [...edgesById.values()].some(
+      (edge) => edge.kind === "concept" && edge.target === node.id,
+    );
+    if (!referenced) {
+      problems.push(`orphaned concept node: ${node.id}`);
     }
   }
 

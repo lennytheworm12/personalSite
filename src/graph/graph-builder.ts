@@ -46,6 +46,7 @@ export function buildHomeGraph(input: GraphBuilderInput): HomeGraphResult {
 
   const featuredProjects = input.projects.filter((project) => project.featured);
   const technologyNodesById = new Map<string, GraphNode>();
+  const conceptNodesById = new Map<string, GraphNode>();
 
   for (const project of featuredProjects) {
     const projectId = `project:${project.slug}`;
@@ -109,6 +110,34 @@ export function buildHomeGraph(input: GraphBuilderInput): HomeGraphResult {
         kind: "technology",
         source: projectId,
         target: techId,
+      });
+    }
+
+    // project -> concept (slugified labels; shared labels collapse into one node)
+    for (const concept of project.concepts) {
+      const conceptSlug = concept
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+      if (!conceptSlug) continue;
+      const conceptId = `concept:${conceptSlug}`;
+      let conceptNode = conceptNodesById.get(conceptId);
+      if (!conceptNode) {
+        conceptNode = {
+          id: conceptId,
+          kind: "concept",
+          label: concept,
+          detail: `${concept} — a concept explored through ${project.title}.`,
+          priority: 3,
+        };
+        conceptNodesById.set(conceptId, conceptNode);
+        nodes.push(conceptNode);
+      }
+      edges.push({
+        id: edgeId("concept", projectId, conceptId),
+        kind: "concept",
+        source: projectId,
+        target: conceptId,
       });
     }
   }
