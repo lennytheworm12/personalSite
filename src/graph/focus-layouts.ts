@@ -120,7 +120,7 @@ export const FOCUS_LAYOUTS: FocusLayouts = {
 export function validateFocusLayouts(
   graph: HomeGraph,
   layouts: FocusLayouts,
-  options: { featuredSlugs?: readonly string[]; minSeparation?: number } = {}
+  options: { featuredSlugs?: readonly string[]; minSeparation?: number } = {},
 ): void {
   const problems: string[] = [];
   const viewports = Object.keys(layouts) as Array<keyof FocusLayouts>;
@@ -157,7 +157,9 @@ export function validateFocusLayouts(
 
       for (const key of Object.keys(preset.nodes)) {
         if (!nodeById.has(key)) {
-          problems.push(`unknown coordinate ID in focus layout ${viewport}/${slug}: ${key}`);
+          problems.push(
+            `unknown coordinate ID in focus layout ${viewport}/${slug}: ${key}`,
+          );
         }
       }
 
@@ -173,21 +175,32 @@ export function validateFocusLayouts(
         Number.isNaN(focused.x) ||
         Number.isNaN(focused.y)
       ) {
-        problems.push(`invalid focused-project coordinates for ${projectId} (${viewport})`);
+        problems.push(
+          `invalid focused-project coordinates for ${projectId} (${viewport})`,
+        );
       } else if (focused.x < 35 || focused.x > 65 || focused.y < 30 || focused.y > 70) {
-        problems.push(`focused project not sufficiently central in ${viewport}/${slug}`);
+        problems.push(
+          `focused project not sufficiently central in ${viewport}/${slug}`,
+        );
       }
 
       for (const node of graph.nodes) {
         const point = preset.nodes[node.id];
         if (!point) {
-          problems.push(`missing focus coordinate for ${node.id} in ${viewport}/${slug}`);
+          problems.push(
+            `missing focus coordinate for ${node.id} in ${viewport}/${slug}`,
+          );
           continue;
         }
         for (const value of [point.x, point.y]) {
-          if (typeof value !== "number" || Number.isNaN(value) || value < 0 || value > 100) {
+          if (
+            typeof value !== "number" ||
+            Number.isNaN(value) ||
+            value < 0 ||
+            value > 100
+          ) {
             problems.push(
-              `out-of-bounds coordinate for ${node.id} in focus layout ${viewport}/${slug}`
+              `out-of-bounds coordinate for ${node.id} in focus layout ${viewport}/${slug}`,
             );
           }
         }
@@ -202,7 +215,7 @@ export function validateFocusLayouts(
         const d = distance(focused, point);
         if (d > 45) {
           problems.push(
-            `related node too far from focus in ${viewport}/${slug}: ${relatedId} at ${d.toFixed(1)}`
+            `related node too far from focus in ${viewport}/${slug}: ${relatedId} at ${d.toFixed(1)}`,
           );
         }
       }
@@ -215,7 +228,7 @@ export function validateFocusLayouts(
         const d = distance(focused, point);
         if (d < minSeparation) {
           problems.push(
-            `separation violation in focus layout ${viewport}/${slug}: ${node.id} at ${d.toFixed(1)} < ${minSeparation}`
+            `separation violation in focus layout ${viewport}/${slug}: ${node.id} at ${d.toFixed(1)} < ${minSeparation}`,
           );
         }
       }
@@ -231,7 +244,7 @@ export function validateFocusLayouts(
 export function resolveFocusLayout(
   layouts: FocusLayouts,
   viewport: LayoutViewport,
-  slug: string
+  slug: string,
 ): FocusLayoutPreset | null {
   return layouts[viewport]?.[slug] ?? null;
 }

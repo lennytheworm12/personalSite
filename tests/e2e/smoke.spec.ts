@@ -20,13 +20,26 @@ test.describe("static route smoke", () => {
     });
   }
 
-  test("Index links to both generated case studies", async ({ page }) => {
+  test("Index view links to both generated case studies (lens switch + deep link)", async ({
+    page,
+  }) => {
+    // Contract change (Goal 3): Index is a coordinated homepage view. With
+    // JS enabled it appears via the Graph/Index switch or ?view=index; the
+    // no-JS suite verifies both sections remain visible without scripts.
     await page.goto("/");
+    await page.getByRole("button", { name: "Index" }).click();
     const projectList = page.locator("ul.project-list");
     await expect(
       projectList.getByRole("link", { name: "Spotify Sorter" }),
     ).toBeVisible();
     await expect(projectList.getByRole("link", { name: "Game Teacher" })).toBeVisible();
+
+    const page2 = await page.context().newPage();
+    await page2.goto("/?view=index");
+    const deepList = page2.locator("ul.project-list");
+    await expect(deepList.getByRole("link", { name: "Spotify Sorter" })).toBeVisible();
+    await expect(deepList.getByRole("link", { name: "Game Teacher" })).toBeVisible();
+    await page2.close();
   });
 
   test("Index exposes stable placeholders for personal links", async ({ page }) => {

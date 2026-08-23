@@ -1,5 +1,3 @@
-import type { DurableHomepageState } from "./homepage-state";
-
 /**
  * History integration for the homepage (Goal 3, M3).
  *

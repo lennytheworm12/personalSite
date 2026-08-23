@@ -1,18 +1,22 @@
-import { Fragment } from "react";
 import type { HomeGraph } from "@/graph/graph-schema";
-import type { GraphLayouts, LayoutViewport } from "@/graph/layouts";
+import type { Point } from "@/graph/layouts";
 import GraphEdges from "./GraphEdges";
 import GraphNode from "./GraphNode";
 
 interface GraphCanvasProps {
   graph: HomeGraph;
-  layouts: GraphLayouts;
-  viewport: LayoutViewport;
-  activeNodeId: string | null;
+  /** Resolved coordinates for the current scene (home or project focus). */
+  layoutNodes: Record<string, Point>;
+  /**
+   * Nodes currently emphasized (active interaction node, or search matches).
+   * Null = idle (no emphasis/dimming at all).
+   */
+  highlightIds: Set<string> | null;
+  /** Neighbors of highlighted nodes; rendered secondary rather than dimmed. */
+  relatedIds: Set<string>;
   pinnedNodeId: string | null;
-  relatedIdsByNode: Map<string, Set<string>>;
   onNodeHover: (nodeId: string | null) => void;
-  onNodeFocus: (nodeId: string | null) => void;
+  onNodeFocusChange: (nodeId: string | null) => void;
   onNodeActivate: (nodeId: string) => void;
 }
 
@@ -23,48 +27,40 @@ interface GraphCanvasProps {
  */
 export default function GraphCanvas({
   graph,
-  layouts,
-  viewport,
-  activeNodeId,
+  layoutNodes,
+  highlightIds,
+  relatedIds,
   pinnedNodeId,
-  relatedIdsByNode,
   onNodeHover,
-  onNodeFocus,
+  onNodeFocusChange,
   onNodeActivate,
 }: GraphCanvasProps) {
-  const layout = layouts[viewport];
-  const related =
-    activeNodeId !== null
-      ? (relatedIdsByNode.get(activeNodeId) ?? new Set<string>())
-      : null;
-
   return (
-    <div className="graph-canvas" data-viewport={viewport}>
+    <div className="graph-canvas">
       <GraphEdges
         graph={graph}
-        layout={layout}
-        activeNodeId={activeNodeId}
-        relatedIdsByNode={relatedIdsByNode}
+        layoutNodes={layoutNodes}
+        highlightIds={highlightIds}
+        relatedIds={relatedIds}
       />
       <ul className="graph-nodes" aria-label="Graph nodes">
         {graph.nodes.map((node) => {
-          const point = layout.nodes[node.id];
+          const point = layoutNodes[node.id];
           if (!point) return null;
-          const isActive = node.id === activeNodeId;
-          const isRelated = related?.has(node.id) ?? false;
-          const dimmed = activeNodeId !== null && !isActive && !isRelated;
+          const highlighted = highlightIds?.has(node.id) ?? false;
+          const dimmed =
+            highlightIds !== null && !highlighted && !relatedIds.has(node.id);
           return (
-            <Fragment key={node.id}>
-              <GraphNode
-                node={node}
-                point={point}
-                dimmed={dimmed}
-                pressed={pinnedNodeId === node.id}
-                onHover={onNodeHover}
-                onFocusChange={onNodeFocus}
-                onActivate={onNodeActivate}
-              />
-            </Fragment>
+            <GraphNode
+              key={node.id}
+              node={node}
+              point={point}
+              dimmed={dimmed}
+              pressed={pinnedNodeId === node.id}
+              onHover={onNodeHover}
+              onFocusChange={onNodeFocusChange}
+              onActivate={onNodeActivate}
+            />
           );
         })}
       </ul>

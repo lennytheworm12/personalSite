@@ -1,30 +1,26 @@
 import type { HomeGraph } from "@/graph/graph-schema";
-import type { HomeLayoutPreset } from "@/graph/layouts";
+import type { Point } from "@/graph/layouts";
 
 interface GraphEdgesProps {
   graph: HomeGraph;
-  layout: HomeLayoutPreset;
-  activeNodeId: string | null;
-  relatedIdsByNode: Map<string, Set<string>>;
+  layoutNodes: Record<string, Point>;
+  highlightIds: Set<string> | null;
+  relatedIds: Set<string>;
 }
 
 /**
  * SVG edge layer. Sits behind the DOM nodes, ignores pointer events, and
  * carries no accessible text (screen-reader users get meaning from nodes and
- * the detail region instead). Active edges are thicker and solid; inactive
- * edges thinner and dashed — distinguishable without relying on color.
+ * the detail region instead). Edges touching highlighted nodes are thicker
+ * and solid; inactive edges thinner and dashed — distinguishable without
+ * relying on color alone.
  */
 export default function GraphEdges({
   graph,
-  layout,
-  activeNodeId,
-  relatedIdsByNode,
+  layoutNodes,
+  highlightIds,
+  relatedIds,
 }: GraphEdgesProps) {
-  const related =
-    activeNodeId !== null
-      ? (relatedIdsByNode.get(activeNodeId) ?? new Set<string>())
-      : null;
-
   return (
     <svg
       className="graph-edges"
@@ -34,21 +30,20 @@ export default function GraphEdges({
       focusable="false"
     >
       {graph.edges.map((edge) => {
-        const from = layout.nodes[edge.source];
-        const to = layout.nodes[edge.target];
+        const from = layoutNodes[edge.source];
+        const to = layoutNodes[edge.target];
         if (!from || !to) return null;
-        const isActive =
-          activeNodeId !== null &&
-          (edge.source === activeNodeId || edge.target === activeNodeId);
-        const isSecondary =
-          !isActive &&
-          activeNodeId !== null &&
-          (related?.has(edge.source) ?? false) &&
-          (related?.has(edge.target) ?? false);
+        const touchesHighlight =
+          highlightIds !== null &&
+          (highlightIds.has(edge.source) || highlightIds.has(edge.target));
+        const bothRelated =
+          highlightIds !== null &&
+          relatedIds.has(edge.source) &&
+          relatedIds.has(edge.target);
         const className = [
           "graph-edge",
-          isActive ? "graph-edge-active" : "",
-          isSecondary ? "graph-edge-secondary" : "",
+          touchesHighlight ? "graph-edge-active" : "",
+          !touchesHighlight && bothRelated ? "graph-edge-secondary" : "",
         ]
           .filter(Boolean)
           .join(" ");

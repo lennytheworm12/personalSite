@@ -17,7 +17,8 @@ export function tokenize(input: string): string[] {
   return normalized ? normalized.split(" ") : [];
 }
 
-export type SearchEntryKind = "project" | "technology" | "concept" | "story" | "profile";
+export type SearchEntryKind =
+  "project" | "technology" | "concept" | "story" | "profile";
 
 export interface SearchEntry {
   id: string;

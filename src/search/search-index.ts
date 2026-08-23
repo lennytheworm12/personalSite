@@ -75,7 +75,10 @@ export function buildSearchIndex(): SearchEntry[] {
     }
 
     for (const concept of project.concepts) {
-      const slugified = concept.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+      const slugified = concept
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
       if (!slugified) continue;
       entries.push({
         id: `search:concept:${slugified}`,

@@ -8,7 +8,9 @@ const index = buildSearchIndex();
 describe("search index derivation", () => {
   it("derives entries for projects, technologies, concepts, stories, and profile", () => {
     const kinds = new Set(index.map((e) => e.kind));
-    expect(kinds).toEqual(new Set(["project", "technology", "concept", "story", "profile"]));
+    expect(kinds).toEqual(
+      new Set(["project", "technology", "concept", "story", "profile"]),
+    );
   });
 
   it("references valid project slugs and graph node ids", () => {
@@ -16,12 +18,15 @@ describe("search index derivation", () => {
     const validNodePrefixes = ["project:", "tech:", "concept:", "story:", "person:"];
     for (const entry of index) {
       for (const slug of entry.projectSlugs) {
-        expect(validSlugs.has(slug), `${entry.id} references unknown slug ${slug}`).toBe(true);
+        expect(
+          validSlugs.has(slug),
+          `${entry.id} references unknown slug ${slug}`,
+        ).toBe(true);
       }
       if (entry.nodeId) {
         expect(
           validNodePrefixes.some((prefix) => entry.nodeId?.startsWith(prefix)),
-          `${entry.id} has malformed nodeId ${entry.nodeId}`
+          `${entry.id} has malformed nodeId ${entry.nodeId}`,
         ).toBe(true);
       }
     }
@@ -68,14 +73,16 @@ describe("rankSearchResults — ranking rules", () => {
   it("matches story motivation text", () => {
     const results = rankSearchResults(index, "frustration finding music");
     expect(results.map((r) => r.entry.id)).toContain(
-      "search:story:spotify-sorter:motivation"
+      "search:story:spotify-sorter:motivation",
     );
   });
 
   it("matches project summary text with lower rank than labels", () => {
     const results = rankSearchResults(index, "organizing");
     const storyOrProject = results.filter((r) =>
-      ["search:project:spotify-sorter", "search:concept:music-organization"].includes(r.entry.id)
+      ["search:project:spotify-sorter", "search:concept:music-organization"].includes(
+        r.entry.id,
+      ),
     );
     expect(storyOrProject.length).toBeGreaterThan(0);
   });

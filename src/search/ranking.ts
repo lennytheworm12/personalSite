@@ -23,7 +23,7 @@ export interface ScoredSearchResult {
 
 export function rankSearchResults(
   index: readonly SearchEntry[],
-  rawQuery: string
+  rawQuery: string,
 ): ScoredSearchResult[] {
   const query = normalizeText(rawQuery);
   if (!query) return [];
@@ -56,7 +56,11 @@ export function rankSearchResults(
         }
       }
       // Whole-query token containment in label tokens.
-      if (!score && queryTokens.every((token) => labelTokens.has(token)) && queryTokens.length > 0) {
+      if (
+        !score &&
+        queryTokens.every((token) => labelTokens.has(token)) &&
+        queryTokens.length > 0
+      ) {
         score = Math.max(score, 68);
       }
     }
@@ -74,7 +78,7 @@ export function rankSearchResults(
       // relates to (e.g. searching "Spotify" surfaces its technologies).
       const relatedHit = entry.projectSlugs.some((slug) => {
         return queryTokens.every((token) =>
-          normalizeText(`${entry.kind} ${slug}`).includes(token)
+          normalizeText(`${entry.kind} ${slug}`).includes(token),
         );
       });
       if (relatedHit) score = Math.max(score, 20);
@@ -85,8 +89,11 @@ export function rankSearchResults(
 
   return scored.sort((a, b) => {
     if (b.score !== a.score) return b.score - a.score;
-    if (a.entry.priority !== b.entry.priority) return a.entry.priority - b.entry.priority;
-    const labelCompare = normalizeText(a.entry.label).localeCompare(normalizeText(b.entry.label));
+    if (a.entry.priority !== b.entry.priority)
+      return a.entry.priority - b.entry.priority;
+    const labelCompare = normalizeText(a.entry.label).localeCompare(
+      normalizeText(b.entry.label),
+    );
     if (labelCompare !== 0) return labelCompare;
     return a.entry.id.localeCompare(b.entry.id);
   });

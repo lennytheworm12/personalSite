@@ -26,7 +26,7 @@ test.describe("graph rendering", () => {
     }
     // SVG edge layer exists behind the DOM nodes and has drawn all edges.
     const edgeCount = await page.locator(".graph-edges line").count();
-    expect(edgeCount).toBe(9);
+    expect(edgeCount).toBe(13); // 9 phase-2 + 4 concept edges
   });
 
   test("graph is understandable before interaction (details show instructions)", async ({
@@ -59,38 +59,23 @@ test.describe("graph interaction — pointer", () => {
     ).toHaveClass(/graph-node-dimmed/);
     // Edges touching the active node switch to the active style.
     const activeEdges = page.locator(".graph-edge-active");
-    // spotify-sorter: 1 ownership + 1 motivation + 3 technology edges
-    await expect(activeEdges).toHaveCount(5);
+    // spotify-sorter: ownership + motivation + 3 technology + 2 concept
+    await expect(activeEdges).toHaveCount(7);
   });
 
-  test("click pins the node detail; clicking again unpins", async ({ page }) => {
+  test("click pins a supporting-node detail; clicking again unpins", async ({
+    page,
+  }) => {
+    // Contract change (Goal 3): project clicks enter Project Focus
+    // (covered by goal3.spec); supporting nodes keep pin-to-detail.
     await page.goto("/");
-    const button = page.locator('[data-node-id="project:game-teacher"]');
+    await page.waitForSelector('.homepage-island[data-hydrated="true"]');
+    const button = page.locator('[data-node-id="tech:typescript"]');
     await button.click();
     await expect(button).toHaveAttribute("aria-pressed", "true");
     await expect(page.locator(".graph-details")).toContainText("Pinned");
     await button.click();
     await expect(button).toHaveAttribute("aria-pressed", "false");
-  });
-
-  test("project node links to its case study from the pinned detail region", async ({
-    page,
-  }) => {
-    await page.goto("/");
-    // Pin first: pinned detail is immune to pointer travel across other
-    // nodes (that is what pinning is for).
-    const button = page.locator('[data-node-id="project:game-teacher"]');
-    await button.click();
-    await expect(button).toHaveAttribute("aria-pressed", "true");
-    const link = page
-      .locator(".graph-details")
-      .getByRole("link", { name: "Open the case study" });
-    await expect(link).toBeVisible();
-    await link.click();
-    await expect(page).toHaveURL(/\/projects\/game-teacher\/$/);
-    await expect(
-      page.getByRole("heading", { level: 1, name: "Game Teacher" }),
-    ).toBeVisible();
   });
 
   test("technology node lists related projects with case-study links", async ({
@@ -140,12 +125,12 @@ test.describe("graph interaction — keyboard", () => {
     await expect(page.locator(".graph-details")).toContainText("React");
   });
 
-  test("nodes are reachable by keyboard and the Index jump link works", async ({
+  test("nodes are reachable by keyboard and the view switch reaches the Index", async ({
     page,
   }) => {
     await page.goto("/");
-    // Tab into the graph: first graph focus lands inside the island.
-    await page.getByRole("link", { name: /jump to the project index/i }).focus();
+    // Tab from the view-switch controls into graph nodes.
+    await page.getByRole("button", { name: "Search" }).focus();
     await page.keyboard.press("Shift+Tab");
     let hops = 0;
     let insideGraph = false;
@@ -159,10 +144,11 @@ test.describe("graph interaction — keyboard", () => {
       hops++;
     }
     expect(insideGraph, "a graph node should be keyboard-reachable").toBe(true);
-    const jumpLink = page
-      .getByRole("link", { name: /jump to the project index/i })
-      .first();
-    await jumpLink.click();
-    await expect(page.locator("#project-index")).toBeInViewport();
+    // The coordinated Index switch reveals the full index without reload.
+    await page.getByRole("button", { name: "Index" }).click();
+    await expect(page.locator("#project-index")).toBeVisible();
+    await expect(page).toHaveURL(/[?&]view=index/);
+    await page.getByRole("button", { name: "Graph" }).click();
+    await expect(page.locator(".graph-canvas")).toBeVisible();
   });
 });

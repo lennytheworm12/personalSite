@@ -3,10 +3,10 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 import { buildMetadata } from "@/lib/metadata";
 import { withBase } from "@/lib/base-path";
 import { projects } from "@/content/projects";
-import { homeGraph } from "@/graph/graph-data";
-import { HOME_LAYOUTS, SSR_DEFAULT_VIEWPORT } from "@/graph/layouts";
-import GraphIsland from "@/components/graph/GraphIsland";
-import { ProjectCard } from "@/components/ProjectCard";
+import { homeGraph, homeGraphResult } from "@/graph/graph-data";
+import { HOME_LAYOUTS } from "@/graph/layouts";
+import { FOCUS_LAYOUTS } from "@/graph/focus-layouts";
+import HomepageIsland from "@/components/homepage/HomepageIsland";
 
 const metadata = buildMetadata({
   title: "Home",
@@ -15,10 +15,20 @@ const metadata = buildMetadata({
   path: "/",
 });
 
+// Compact summaries only — never full case-study bodies.
+const projectSummaries = projects.map((project) => ({
+  slug: project.slug,
+  title: project.title,
+  tagline: project.tagline,
+  status: project.status,
+  contribution: project.contribution?.text,
+  stack: project.technologies.map((technology) => technology.label),
+}));
+
 /**
  * Stable contact placeholders. Personal handles and URLs are unresolved
- * facts (see docs/decisions-log.md B4): they are rendered as plain text
- * until confirmed values exist — never invented.
+ * facts (see docs/decisions-log.md B4): rendered as plain text until
+ * confirmed values exist — never invented. LeetCode is deferred (R2).
  */
 const contacts = [
   {
@@ -31,14 +41,7 @@ const contacts = [
   { id: "contact-linkedin", label: "LinkedIn", note: "Profile URL not yet published." },
   { id: "contact-resume", label: "Résumé", note: "Résumé file not yet published." },
   { id: "contact-email", label: "Contact", note: "Email address not yet published." },
-] satisfies ContactPlaceholder[];
-
-interface ContactPlaceholder {
-  id: string;
-  label: string;
-  note: string;
-  href?: string;
-}
+];
 ---
 
 <BaseLayout metadata={metadata} currentPath="/">
@@ -49,55 +52,13 @@ interface ContactPlaceholder {
     invented.
   </p>
 
-  <section class="graph-region" aria-labelledby="graph-heading">
-    <h2 id="graph-heading">Project graph</h2>
-    <p class="graph-instructions">
-      A visual map of Bi Phan's projects (circles marked by size), why they exist, and
-      the technologies inside them. Hover a circle or move keyboard focus to read about
-      it below the map; press Enter to pin it and Escape to unpin. Prefer plain lists?{
-        " "
-      }
-      <a href="#project-index">Jump to the project index</a>.
-    </p>
-    <GraphIsland
-      client:load
-      graph={homeGraph}
-      layouts={HOME_LAYOUTS}
-      ssrViewport={SSR_DEFAULT_VIEWPORT}
-    />
-    <p class="graph-instructions">
-      The same information is available as text in the{" "}
-      <a href={withBase("#project-index")}>project index</a> below.
-    </p>
-  </section>
-
-  <section aria-labelledby="project-index-heading" id="project-index">
-    <h2 id="project-index-heading">Project index</h2>
-    <ul class="project-list">
-      {projects.map((project) => <ProjectCard project={project} />)}
-    </ul>
-  </section>
-
-  <section aria-labelledby="contact-heading">
-    <h2 id="contact-heading">Find me</h2>
-    <ul class="contact-list">
-      {
-        contacts.map((contact) => (
-          <li id={contact.id}>
-            {contact.href ? (
-              <>
-                <strong>{contact.label}:</strong>{" "}
-                <a href={contact.href}>{contact.note}</a>
-              </>
-            ) : (
-              <>
-                <strong>{contact.label}:</strong>{" "}
-                <span class="placeholder-note">{contact.note}</span>
-              </>
-            )}
-          </li>
-        ))
-      }
-    </ul>
-  </section>
+  <HomepageIsland
+    client:load
+    graph={homeGraph}
+    layouts={HOME_LAYOUTS}
+    focusLayouts={FOCUS_LAYOUTS}
+    projects={projectSummaries}
+    contacts={contacts}
+    caseStudyHrefBySlug={homeGraphResult.caseStudyHrefBySlug}
+  />
 </BaseLayout>

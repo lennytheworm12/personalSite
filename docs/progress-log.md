@@ -90,3 +90,26 @@
   dist ≈227 KiB. Well under the 200 KiB hard ceiling.
 - M10/M11: 76 unit/integration tests + 196 browser assertions green from
   a clean install; base-path production build verified separately.
+
+## 2026-08-22 — Goals 3–4 run: Goal 3 core implemented (M1–M10)
+
+- Canonical notes recovered at /mnt/c/Users/bphan/obsidian-vault; all read;
+  no contradictions with shipped architecture (R7 updated).
+- M1: concept node kind + concept edge kind; 4 derived concepts
+  (music-organization, playlist-curation, game-design, teaching);
+  graph now 12 nodes / 13 edges.
+- M2: src/state/homepage-state.ts — pure reducer owning view/scene/search.
+- M3: src/state/homepage-url.ts + homepage-history.ts — parse/serialize/
+  canonicalize; pushState for navigation, replaceState for typing;
+  history.state source marker for deep-link Back safety; popstate hydrate.
+- M4/M5: build-derived search index (14 entries) + deterministic ranking
+  bands with priority/label/id tie-breaks.
+- M6-M10: HomepageIsland replaces GraphIsland as single durable-state
+  owner: Graph/Index view switch, SearchPanel (keyboard results, polite
+  announcements), project-focus scenes from authored layouts with
+  Back/Home/View Case Study controls, hover-grace timer (150ms) replacing
+  indefinite sticky hover, Escape priority search > pin > focus.
+- No-JS: both views SSR fully visible pre-hydration (mounted-gated hiding).
+- Mobile boot default: Index when viewport <768px without explicit ?view=.
+- Contract changes recorded: project-node click now enters focus (was
+  pin); two Phase-2 tests updated to equal-or-stronger equivalents.
