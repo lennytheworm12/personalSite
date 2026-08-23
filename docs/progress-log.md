@@ -126,6 +126,7 @@
 - Non-home routes remain script-free (containment gate).
 
 ## 2026-08-23 — GOAL 4 COMPLETE: dedicated mobile experience
+
 - M13: phone/phone-tall/phone-landscape authored layouts (person+projects
   mandatory; supporting density reduced); selectViewport resolves by
   aspect ratio; validator center-region rule scoped to desktop.
