@@ -111,3 +111,18 @@ pointer traveled toward them (caught by Firefox timing in e2e). Hover now
 persists until another node is hovered/focused or Escape is pressed; pinning
 (Enter/Space/click) remains the explicit way to freeze details. Phase 3 may
 refine this with hover-intent delays.
+
+### R7 — Canonical notes status at Goals 3–4 kickoff (2026-08-22)
+
+The Goals 3–4 brief asserts the canonical Obsidian notes were recovered and
+are available. **Vault evidence at kickoff shows they are still absent** —
+the vault contains only the progress log maintained during Phases 1–2.
+This entry records the discrepancy honestly instead of claiming recovery:
+
+- historical entries above remain accurate for their time;
+- from Goal 3 onward, the operative source material is the goal brief
+  itself (which embeds the full M0–M25 design with acceptance criteria);
+- if the notes are later recovered, reconcile against shipped behavior
+  before Phase 5 design.
+  User action needed: verify vault sync (the vault is empty except for the
+  progress log).
