@@ -74,9 +74,60 @@ export const LAPTOP_LAYOUT: HomeLayoutPreset = {
   },
 };
 
+/**
+ * Mobile home layouts (Goal 4, M13): distinct compositions with reduced
+ * supporting density — person and projects are required; stories/concepts
+ * may be omitted visually (their information stays reachable via Search,
+ * Index, and case studies). Never a scaled-down desktop preset.
+ */
+export const PHONE_LAYOUT: HomeLayoutPreset = {
+  viewport: "phone",
+  nodes: {
+    "person:bi": { x: 50, y: 18 },
+    "project:spotify-sorter": { x: 30, y: 48 },
+    "project:game-teacher": { x: 72, y: 74 },
+    "tech:typescript": { x: 66, y: 34 },
+    "tech:react": { x: 26, y: 80 },
+    "tech:web-audio-api": { x: 76, y: 94 },
+  },
+};
+
+export const PHONE_TALL_LAYOUT: HomeLayoutPreset = {
+  viewport: "phone-tall",
+  nodes: {
+    "person:bi": { x: 50, y: 12 },
+    "project:spotify-sorter": { x: 28, y: 40 },
+    "project:game-teacher": { x: 70, y: 68 },
+    "tech:typescript": { x: 70, y: 28 },
+    "tech:react": { x: 24, y: 74 },
+    "tech:web-audio-api": { x: 78, y: 92 },
+  },
+};
+
+export const PHONE_LANDSCAPE_LAYOUT: HomeLayoutPreset = {
+  viewport: "phone-landscape",
+  nodes: {
+    "person:bi": { x: 22, y: 50 },
+    "project:spotify-sorter": { x: 52, y: 26 },
+    "project:game-teacher": { x: 80, y: 72 },
+    "tech:typescript": { x: 56, y: 72 },
+    "tech:react": { x: 40, y: 84 },
+    "tech:web-audio-api": { x: 46, y: 10 },
+  },
+};
+
+export const MOBILE_HOME_LAYOUTS: Record<string, HomeLayoutPreset> = {
+  phone: PHONE_LAYOUT,
+  "phone-tall": PHONE_TALL_LAYOUT,
+  "phone-landscape": PHONE_LANDSCAPE_LAYOUT,
+};
+
 export const HOME_LAYOUTS: Record<LayoutViewport, HomeLayoutPreset> = {
   wide: WIDE_LAYOUT,
   laptop: LAPTOP_LAYOUT,
+  phone: PHONE_LAYOUT,
+  "phone-tall": PHONE_TALL_LAYOUT,
+  "phone-landscape": PHONE_LANDSCAPE_LAYOUT,
 };
 
 /** Preset used for server-rendered markup before hydration measures width. */
@@ -84,8 +135,19 @@ export const SSR_DEFAULT_VIEWPORT: LayoutViewport = "wide";
 
 export type GraphLayouts = typeof HOME_LAYOUTS;
 
-/** Select a preset for a pixel width (hydration-time only). */
-export function selectViewport(widthPx: number): LayoutViewport {
+/** Select a preset from window dimensions (hydration-time only). */
+export function selectViewport(
+  widthPx: number,
+  heightPx: number = widthPx,
+): LayoutViewport {
+  if (widthPx <= 767) {
+    // Portrait phones vs landscape phones by aspect ratio.
+    return heightPx > widthPx
+      ? heightPx / widthPx > 1.85
+        ? "phone-tall"
+        : "phone"
+      : "phone-landscape";
+  }
   return widthPx >= 1100 ? "wide" : "laptop";
 }
 

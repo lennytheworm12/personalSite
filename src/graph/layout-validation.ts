@@ -51,10 +51,17 @@ export function validateLayouts(
       }
     }
 
+    // Mobile compositions may omit supporting density: only person/project
+    // placement is mandatory there.
+    const mobileViewport = viewport.startsWith("phone");
     for (const node of graph.nodes) {
       const point: Point | undefined = layout.nodes[node.id];
       if (!point) {
-        problems.push(`missing ${viewport} coordinates for node: ${node.id}`);
+        const omittable =
+          mobileViewport && node.kind !== "person" && node.kind !== "project";
+        if (!omittable) {
+          problems.push(`missing ${viewport} coordinates for node: ${node.id}`);
+        }
         continue;
       }
       const coords: Array<[string, number]> = [
@@ -74,9 +81,10 @@ export function validateLayouts(
       }
     }
 
-    // Person node must sit inside the defined central region.
+    // Person node must sit inside the defined central region on desktop
+    // layouts; mobile compositions intentionally place Me near the top.
     const person = graph.nodes.find((node) => node.kind === "person");
-    if (person) {
+    if (person && !viewport.startsWith("phone")) {
       const p = layout.nodes[person.id];
       if (
         !p ||
@@ -89,7 +97,7 @@ export function validateLayouts(
       }
     }
 
-    // Priority-1 minimum spacing.
+    // Priority-1 minimum spacing (only where all primary nodes are placed).
     const primaryNodes = graph.nodes.filter((node) => node.priority === 1);
     for (let i = 0; i < primaryNodes.length; i++) {
       for (let j = i + 1; j < primaryNodes.length; j++) {

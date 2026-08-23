@@ -115,6 +115,7 @@
   pin); two Phase-2 tests updated to equal-or-stronger equivalents.
 
 ## 2026-08-23 — GOAL 3 COMPLETE (checkpoint)
+
 - Clean-install verification: format/lint/types/content/graph/unit(129)/
   integration/build/verify-build/e2e(224 incl. axe on search+focus+index)
   all green.

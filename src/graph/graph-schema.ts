@@ -21,7 +21,13 @@ export const EDGE_KIND_VALUES = [
   "technology",
   "concept",
 ] as const;
-export const LAYOUT_VIEWPORTS = ["wide", "laptop"] as const;
+export const LAYOUT_VIEWPORTS = [
+  "wide",
+  "laptop",
+  "phone",
+  "phone-tall",
+  "phone-landscape",
+] as const;
 
 export type NodeKind = (typeof NODE_KIND_VALUES)[number];
 export type EdgeKind = (typeof EDGE_KIND_VALUES)[number];

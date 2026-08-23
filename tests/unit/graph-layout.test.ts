@@ -6,7 +6,7 @@ import { homeGraph } from "@/graph/graph-data";
 describe("authored layouts", () => {
   it("places every graph node in both wide and laptop layouts", () => {
     expect(() => validateLayouts(homeGraph, HOME_LAYOUTS)).not.toThrow();
-    for (const preset of Object.values(HOME_LAYOUTS)) {
+    for (const preset of [HOME_LAYOUTS.wide, HOME_LAYOUTS.laptop]) {
       for (const node of homeGraph.nodes) {
         expect(
           preset.nodes[node.id],
@@ -55,14 +55,18 @@ describe("authored layouts", () => {
     );
   });
 
-  it("keeps the person node inside the center-safe region", () => {
-    for (const preset of Object.values(HOME_LAYOUTS)) {
+  it("keeps the person node inside the center-safe region on desktop layouts", () => {
+    for (const preset of [HOME_LAYOUTS.wide, HOME_LAYOUTS.laptop]) {
       const p = preset.nodes["person:bi"];
       if (!p) throw new Error(`person:bi missing from ${preset.viewport}`);
       expect(p.x).toBeGreaterThanOrEqual(40);
       expect(p.x).toBeLessThanOrEqual(60);
       expect(p.y).toBeGreaterThanOrEqual(35);
       expect(p.y).toBeLessThanOrEqual(65);
+    }
+    // Mobile places Me near the top instead.
+    for (const preset of [HOME_LAYOUTS.phone, HOME_LAYOUTS["phone-tall"]]) {
+      expect(preset.nodes["person:bi"]?.y).toBeLessThan(35);
     }
   });
 
