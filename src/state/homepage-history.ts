@@ -24,7 +24,10 @@ export interface HomepageHistoryEntry {
 /** True when the current history entry was created by in-app navigation. */
 export function wasNavigatedInApp(): boolean {
   if (typeof window === "undefined") return false;
-  return window.history.state?.[HISTORY_STATE_KEY]?.source === HISTORY_APP_SOURCE;
+  const state = window.history.state as Partial<
+    Record<string, { source?: string }>
+  > | null;
+  return state?.[HISTORY_STATE_KEY]?.source === HISTORY_APP_SOURCE;
 }
 
 function urlWithQuery(query: string): string {

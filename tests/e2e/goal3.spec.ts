@@ -1,9 +1,9 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 test.skip(({ viewport }) => (viewport?.width ?? 0) < 900, "desktop-only suite");
 
 /** Interactions require hydration; SSR-only buttons have no handlers yet. */
-async function gotoHydrated(page: import("@playwright/test").Page, url = "/") {
+async function gotoHydrated(page: Page, url = "/") {
   await page.goto(url);
   await page.waitForSelector('.homepage-island[data-hydrated="true"]');
 }

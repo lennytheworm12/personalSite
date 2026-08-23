@@ -113,3 +113,13 @@
 - Mobile boot default: Index when viewport <768px without explicit ?view=.
 - Contract changes recorded: project-node click now enters focus (was
   pin); two Phase-2 tests updated to equal-or-stronger equivalents.
+
+## 2026-08-23 — GOAL 3 COMPLETE (checkpoint)
+- Clean-install verification: format/lint/types/content/graph/unit(129)/
+  integration/build/verify-build/e2e(224 incl. axe on search+focus+index)
+  all green.
+- Budgets: homepage JS 81.0 KiB gzip / 268.3 KiB raw (2 chunks), homepage
+  HTML 28.9 KiB, dist 322.9 KiB — under preferred 100 KiB target and far
+  below the 200 KiB hard ceiling.
+- Base-path (/personalSite/) production build verified separately.
+- Non-home routes remain script-free (containment gate).

@@ -98,7 +98,6 @@ export default function HomepageIsland({
   // Boot: canonicalize the URL once and mark direct deep links.
   useEffect(() => {
     replaceHomepageUrl(serializeHomepageState(durable), "deep-link");
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- boot only
   }, []);
 
   // Browser Back/Forward re-derives state from the URL; never writes history.
@@ -258,6 +257,17 @@ export default function HomepageIsland({
     pinnedNodeId,
   ]);
 
+  // Escape works from any focused descendant via bubbling (M6 priority).
+  const islandRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") handleEscape();
+    };
+    const el = islandRef.current;
+    el?.addEventListener("keydown", onKeyDown);
+    return () => el?.removeEventListener("keydown", onKeyDown);
+  }, [handleEscape]);
+
   // ---- Hover grace (M10): leaving a node starts a short timer; entering the
   // details region or another node cancels it. Keyboard focus supersedes. ----
   const handleNodeHover = useCallback((nodeId: string | null) => {
@@ -286,13 +296,11 @@ export default function HomepageIsland({
 
   return (
     <div
+      ref={islandRef}
       className="homepage-island"
       role="group"
       aria-label="Interactive project explorer"
       data-hydrated={mounted ? "true" : "false"}
-      onKeyDown={(event) => {
-        if (event.key === "Escape") handleEscape();
-      }}
     >
       <div className="homepage-controls">
         <div className="view-switch" role="group" aria-label="Homepage view">
