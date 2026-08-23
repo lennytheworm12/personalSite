@@ -44,14 +44,20 @@ describe("homepage state reducer", () => {
   it("Home -> Project Focus sets scene and keeps query context", () => {
     let state = reduceHomepageState(initial, { type: "searchOpen" });
     state = reduceHomepageState(state, { type: "searchQuery", query: "react" });
-    state = reduceHomepageState(state, { type: "focusProject", slug: "spotify-sorter" });
+    state = reduceHomepageState(state, {
+      type: "focusProject",
+      slug: "spotify-sorter",
+    });
     expect(state.scene).toEqual({ kind: "project", slug: "spotify-sorter" });
     expect(state.search.query).toBe("react");
     expect(state.search.activeResultIndex).toBeNull();
   });
 
   it("Project Focus -> Home clears scene and search", () => {
-    let state = reduceHomepageState(initial, { type: "focusProject", slug: "game-teacher" });
+    let state = reduceHomepageState(initial, {
+      type: "focusProject",
+      slug: "game-teacher",
+    });
     state = reduceHomepageState(state, { type: "goHome" });
     expect(state.scene).toEqual({ kind: "home" });
     expect(state.search.open).toBe(false);
@@ -59,7 +65,10 @@ describe("homepage state reducer", () => {
   });
 
   it("Graph -> Index -> Graph switches view without touching scene", () => {
-    let state = reduceHomepageState(initial, { type: "focusProject", slug: "game-teacher" });
+    let state = reduceHomepageState(initial, {
+      type: "focusProject",
+      slug: "game-teacher",
+    });
     state = reduceHomepageState(state, { type: "setView", view: "index" });
     expect(state.view).toBe("index");
     expect(state.scene).toEqual({ kind: "project", slug: "game-teacher" });
@@ -74,10 +83,12 @@ describe("homepage state reducer", () => {
   });
 
   it("rejects invalid project focus actions (empty/oversized slugs)", () => {
-    expect(reduceHomepageState(initial, { type: "focusProject", slug: "" })).toEqual(initial);
-    expect(reduceHomepageState(initial, { type: "focusProject", slug: "a".repeat(65) })).toEqual(
-      initial
+    expect(reduceHomepageState(initial, { type: "focusProject", slug: "" })).toEqual(
+      initial,
     );
+    expect(
+      reduceHomepageState(initial, { type: "focusProject", slug: "a".repeat(65) }),
+    ).toEqual(initial);
   });
 
   it("rejects unknown views by returning unchanged state", () => {
@@ -95,11 +106,16 @@ describe("homepage state reducer", () => {
       scene: { kind: "project", slug: "spotify-sorter" },
       search: { open: false, query: "", activeResultIndex: null },
     };
-    expect(reduceHomepageState(initial, { type: "hydrate", state: target })).toEqual(target);
+    expect(reduceHomepageState(initial, { type: "hydrate", state: target })).toEqual(
+      target,
+    );
   });
 
   it("search while focused project keeps scene; clear keeps focus too", () => {
-    let state = reduceHomepageState(initial, { type: "focusProject", slug: "spotify-sorter" });
+    let state = reduceHomepageState(initial, {
+      type: "focusProject",
+      slug: "spotify-sorter",
+    });
     state = reduceHomepageState(state, { type: "searchOpen" });
     expect(state.scene.kind).toBe("project");
     state = reduceHomepageState(state, { type: "searchClose" });

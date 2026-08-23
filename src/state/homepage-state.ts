@@ -10,9 +10,7 @@
 
 export type HomepageView = "graph" | "index";
 
-export type GraphScene =
-  | { kind: "home" }
-  | { kind: "project"; slug: string };
+export type GraphScene = { kind: "home" } | { kind: "project"; slug: string };
 
 export interface SearchState {
   open: boolean;
@@ -61,7 +59,7 @@ const KNOWN_VIEWS = new Set<string>(HOMEPAGE_VIEWS);
  */
 export function reduceHomepageState(
   state: DurableHomepageState,
-  action: HomepageAction
+  action: HomepageAction,
 ): DurableHomepageState {
   switch (action.type) {
     case "setView": {
@@ -85,7 +83,10 @@ export function reduceHomepageState(
     case "searchOpen":
       return { ...state, search: { ...state.search, open: true } };
     case "searchClose":
-      return { ...state, search: { ...state.search, open: false, activeResultIndex: null } };
+      return {
+        ...state,
+        search: { ...state.search, open: false, activeResultIndex: null },
+      };
     case "searchQuery": {
       const query = action.query.slice(0, MAX_QUERY_LENGTH);
       return { ...state, search: { ...state.search, query, activeResultIndex: null } };
