@@ -1,6 +1,14 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("small-screen fallback (graph hidden, Index primary)", () => {
+  // This suite covers the stable post-intro state; intro behavior lives in
+  // mobile.spec.ts.
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => {
+      window.localStorage.setItem("portfolio:intro:v1", "done");
+    });
+  });
+
   test("the graph island is not visible and causes no overflow", async ({ page }) => {
     test.skip(
       page.viewportSize() === null ||
@@ -22,12 +30,15 @@ test.describe("small-screen fallback (graph hidden, Index primary)", () => {
         (page.viewportSize()?.width ?? Number.POSITIVE_INFINITY) >= 900,
     );
     await page.goto("/");
+    await page.waitForSelector('.homepage-island[data-hydrated="true"]');
     const link = page
       .locator(".project-list")
       .getByRole("link", { name: "Spotify Sorter" });
     await expect(link).toBeVisible();
-    const box = await link.boundingBox();
-    expect(box?.height ?? 0).toBeGreaterThanOrEqual(40); // ~44px target guidance
+    // Hydration can swap DOM nodes under us; poll until geometry is stable.
+    await expect
+      .poll(async () => (await link.boundingBox())?.height ?? 0, { timeout: 5_000 })
+      .toBeGreaterThanOrEqual(40); // ~44px target guidance
     await link.click();
     await expect(page).toHaveURL(/\/projects\/spotify-sorter\/$/);
   });

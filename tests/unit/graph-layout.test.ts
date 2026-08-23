@@ -25,9 +25,9 @@ describe("authored layouts", () => {
       laptop: HOME_LAYOUTS.laptop,
     };
     // Cast: simulating an authored typo reaching the validator.
-    expect(() => validateLayouts(homeGraph, bad as typeof HOME_LAYOUTS)).toThrow(
-      /unknown layout coordinate ID in wide: project:ghost/,
-    );
+    expect(() =>
+      validateLayouts(homeGraph, bad as unknown as typeof HOME_LAYOUTS),
+    ).toThrow(/unknown layout coordinate ID in wide: project:ghost/);
   });
 
   it("rejects a missing coordinate", () => {
@@ -37,9 +37,9 @@ describe("authored layouts", () => {
       wide: { ...HOME_LAYOUTS.wide, nodes: wideWithoutPerson },
       laptop: HOME_LAYOUTS.laptop,
     };
-    expect(() => validateLayouts(homeGraph, bad)).toThrow(
-      /missing wide coordinates for node: person:bi/,
-    );
+    expect(() =>
+      validateLayouts(homeGraph, bad as unknown as typeof HOME_LAYOUTS),
+    ).toThrow(/missing wide coordinates for node: person:bi/);
   });
 
   it("rejects out-of-bounds coordinates", () => {
@@ -50,9 +50,9 @@ describe("authored layouts", () => {
       },
       laptop: HOME_LAYOUTS.laptop,
     };
-    expect(() => validateLayouts(homeGraph, bad)).toThrow(
-      /out-of-bounds x coordinate for person:bi/,
-    );
+    expect(() =>
+      validateLayouts(homeGraph, bad as unknown as typeof HOME_LAYOUTS),
+    ).toThrow(/out-of-bounds x coordinate for person:bi/);
   });
 
   it("keeps the person node inside the center-safe region on desktop layouts", () => {
@@ -79,9 +79,9 @@ describe("authored layouts", () => {
       },
       laptop: HOME_LAYOUTS.laptop,
     };
-    expect(() => validateLayouts(homeGraph, squeezed)).toThrow(
-      /priority-1 spacing violation/,
-    );
+    expect(() =>
+      validateLayouts(homeGraph, squeezed as unknown as typeof HOME_LAYOUTS),
+    ).toThrow(/priority-1 spacing violation/);
   });
 
   it("selects the laptop preset below 1100px and wide above", () => {

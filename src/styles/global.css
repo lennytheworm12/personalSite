@@ -537,3 +537,49 @@ a {
   gap: 0.3rem;
   margin: 0.4rem 0 0;
 }
+
+/* ============================================================
+   Mobile experience (Goal 4)
+   ============================================================ */
+
+.mobile-graph-note {
+  color: var(--color-muted);
+  font-size: 0.9rem;
+  margin: 0 0 0.5rem;
+}
+
+.intro-overlay {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.35rem;
+}
+
+.intro-skip {
+  min-height: 44px;
+  font-weight: 600;
+}
+
+/* Intro emphasis: Me first, then one relationship. Pure opacity, no motion
+   loop; reduced-motion users never see the intro at all (boot bypass). */
+.intro-active .graph-node-person {
+  box-shadow: 0 0 0 4px var(--color-accent);
+}
+
+.mobile-project-preview {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 1rem;
+  background: var(--color-surface);
+  margin-top: 0.75rem;
+}
+
+.mobile-project-preview h3 {
+  margin: 0 0 0.35rem;
+}
+
+.mobile-preview-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}

@@ -54,7 +54,7 @@ describe("decideBoot — precedence", () => {
   it("invalid URL view falls back to intent handling (no crash)", () => {
     const result = decideBoot({
       ...base,
-      explicitUrlView: "gallery" as never,
+      explicitUrlView: "gallery",
       hasExplicitUrlIntent: true,
     });
     expect(result.view).toBe("graph");

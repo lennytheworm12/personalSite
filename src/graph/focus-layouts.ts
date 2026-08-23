@@ -21,8 +21,13 @@ export interface FocusLayoutPreset {
   nodes: Record<string, Point>;
 }
 
+/**
+ * Project-focus layouts are authored for desktop/laptop viewports. On
+ * phones, ?focus= resolves to the MobileProjectPreview card instead of a
+ * spatial scene (Goal 4), so mobile entries are intentionally absent.
+ */
 export type FocusLayouts = Record<
-  LayoutViewport,
+  Extract<LayoutViewport, "wide" | "laptop">,
   Record<string, FocusLayoutPreset | undefined>
 >;
 
@@ -240,13 +245,16 @@ export function validateFocusLayouts(
   }
 }
 
-/** Resolve the preset for a scene/viewport with a safe Home fallback. */
+/** Resolve the preset for a scene/viewport with a safe null fallback.
+ *  Phone viewports have no spatial focus scenes (mobile uses previews). */
 export function resolveFocusLayout(
   layouts: FocusLayouts,
   viewport: LayoutViewport,
   slug: string,
 ): FocusLayoutPreset | null {
-  return layouts[viewport]?.[slug] ?? null;
+  if (viewport !== "wide" && viewport !== "laptop") return null;
+  const presets: Record<string, FocusLayoutPreset | undefined> = layouts[viewport];
+  return presets?.[slug] ?? null;
 }
 
 export type { GraphLayouts };

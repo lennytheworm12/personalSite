@@ -124,3 +124,26 @@
   below the 200 KiB hard ceiling.
 - Base-path (/personalSite/) production build verified separately.
 - Non-home routes remain script-free (containment gate).
+
+## 2026-08-23 — GOAL 4 COMPLETE: dedicated mobile experience
+- M13: phone/phone-tall/phone-landscape authored layouts (person+projects
+  mandatory; supporting density reduced); selectViewport resolves by
+  aspect ratio; validator center-region rule scoped to desktop.
+- M14/M15: decideBoot precedence (URL intent > stored preference >
+  intro eligibility > device default) with versioned storage keys
+  portfolio:view:v1 / portfolio:intro:v1. Only explicit choices persist.
+- M16: first-visit mobile intro (~2.8s, opacity emphasis only), Skip
+  visible immediately, auto-complete + touch/scroll/hidden cancel,
+  completion persisted; reduced-motion bypasses via boot decision.
+- M17: mobile Graph is an optional lens with a stable-Index note;
+  Index remains primary; no frozen-blur background (kept DOM lighter —
+  documented choice).
+- M18: SearchPanel serves both views with one engine; same q semantics.
+- M19 ORB OMITTED: decorative-only value at this stage did not justify
+  test-flake risk and extra lifecycle surface; design permits omission.
+- M20/M21: cross-device URL semantics verified (?view/?focus/?q on
+  phones); preview card for ?focus=; Back/Home/Index stationary ~44px.
+- M22/M23: verify-content extended (search refs, focus/mobile layout
+  coverage, view set, LeetCode absence). Combined clean verification:
+  format/lint/types/content/graph/search/layouts/unit(139)/build/
+  verify-build/e2e(254 incl. mobile+a11y)/both base-path builds — green.

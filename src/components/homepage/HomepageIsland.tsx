@@ -18,6 +18,16 @@ import {
   replaceHomepageUrl,
 } from "@/state/homepage-history";
 import { adjacency } from "@/graph/graph-builder";
+import { selectViewport } from "@/graph/layouts";
+import {
+  decideBoot,
+  isIntroComplete,
+  isMobileViewport,
+  markIntroComplete,
+  prefersReducedMotion,
+  readStoredView,
+  storeView,
+} from "@/state/mobile-preferences";
 import GraphCanvas from "@/components/graph/GraphCanvas";
 import GraphDetails from "@/components/graph/GraphDetails";
 import SearchPanel from "@/components/search/SearchPanel";
@@ -55,6 +65,9 @@ export interface HomepageIslandProps {
 /** Hover-grace period before a node stops being the active hover (M10). */
 const HOVER_GRACE_MS = 150;
 
+/** Total first-visit mobile intro duration (Goal 4 M16 target ~2.5-3s). */
+const INTRO_DURATION_MS = 2800;
+
 /**
  * One durable homepage state owner (Goal 3 M2/M9). Renders both views
  * server-side; after hydration the inactive view is hidden per state.
@@ -75,16 +88,42 @@ export default function HomepageIsland({
     undefined,
     (): DurableHomepageState => {
       if (typeof window === "undefined") return createInitialHomepageState();
-      const explicitView = new URLSearchParams(window.location.search).get("view");
+      const params = new URLSearchParams(window.location.search);
+      const decision = decideBoot({
+        explicitUrlView: params.get("view"),
+        hasExplicitUrlIntent:
+          params.has("view") || params.has("focus") || params.has("q"),
+        widthPx: window.innerWidth,
+        reducedMotion: prefersReducedMotion(),
+        introComplete: isIntroComplete(),
+        storedPreference: readStoredView(),
+      });
       const parsed = parseHomepageUrl(window.location.search, { knownSlugs });
       const state = canonicalizeHomepageState(parsed, knownSlugs);
-      // Device default: phones get the stable Index unless the URL is explicit.
-      if (!explicitView && window.innerWidth < 768) {
-        return { ...state, view: "index" };
-      }
-      return state;
+      return { ...state, view: decision.view };
     },
   );
+
+  /**
+   * First-visit mobile intro (Goal 4 M16). Purely client-side presentation
+   * state: it never enters URL/history and only starts when decideBoot says
+   * it is eligible.
+   */
+  const [introActive, setIntroActive] = useState(false);
+  const introTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  /** Device + viewport tracking (reactive to resizes). */
+  const [dims, setDims] = useState<{ w: number; h: number }>(() => ({
+    w: typeof window === "undefined" ? 1280 : window.innerWidth,
+    h: typeof window === "undefined" ? 800 : window.innerHeight,
+  }));
+  useEffect(() => {
+    const onResize = () => setDims({ w: window.innerWidth, h: window.innerHeight });
+    onResize();
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+  const isMobile = isMobileViewport(dims.w);
 
   // Ephemeral interaction state — deliberately outside URL/history.
   const [mounted, setMounted] = useState(false);
@@ -95,9 +134,22 @@ export default function HomepageIsland({
   const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const bannerRef = useRef<HTMLParagraphElement | null>(null);
 
-  // Boot: canonicalize the URL once and mark direct deep links.
+  // Boot: compute the boot decision from the ORIGINAL URL first, then
+  // canonicalize the address bar. Computing afterwards would see our own
+  // ?view= write and wrongly suppress the mobile intro.
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const decision = decideBoot({
+      explicitUrlView: params.get("view"),
+      hasExplicitUrlIntent:
+        params.has("view") || params.has("focus") || params.has("q"),
+      widthPx: window.innerWidth,
+      reducedMotion: prefersReducedMotion(),
+      introComplete: isIntroComplete(),
+      storedPreference: readStoredView(),
+    });
     replaceHomepageUrl(serializeHomepageState(durable), "deep-link");
+    if (decision.introEligible) setIntroActive(true);
   }, []);
 
   // Browser Back/Forward re-derives state from the URL; never writes history.
@@ -126,11 +178,13 @@ export default function HomepageIsland({
 
   const focusedSlug = durable.scene.kind === "project" ? durable.scene.slug : null;
 
-  // Scene layout: authored home preset or authored focus preset.
-  const viewport =
-    typeof window === "undefined" || window.innerWidth >= 1100 ? "wide" : "laptop";
+  // Scene layout: authored home preset or authored focus preset. Focus
+  // layouts exist only for wide/laptop; mobile uses preview cards.
+  const viewport = selectViewport(dims.w, dims.h);
+  const focusPresets =
+    viewport === "wide" || viewport === "laptop" ? focusLayouts[viewport] : undefined;
   const layoutNodes: Record<string, Point> =
-    (focusedSlug ? focusLayouts[viewport]?.[focusedSlug]?.nodes : undefined) ??
+    (focusedSlug ? focusPresets?.[focusedSlug]?.nodes : undefined) ??
     layouts[viewport].nodes;
 
   // ---- Interaction resolution ----
@@ -183,6 +237,9 @@ export default function HomepageIsland({
   const handleSetView = useCallback(
     (view: "graph" | "index") => {
       if (view === durable.view) return;
+      // Explicit user choice -> persist (M15). Breakpoint-induced or intro
+      // transitions never call this.
+      storeView(view);
       applyTransition(reduceHomepageState(durable, { type: "setView", view }), "push");
     },
     [applyTransition, durable],
@@ -268,6 +325,41 @@ export default function HomepageIsland({
     return () => el?.removeEventListener("keydown", onKeyDown);
   }, [handleEscape]);
 
+  // ---- First-visit intro lifecycle (Goal 4 M16) ----
+  const endIntro = useCallback((complete: boolean) => {
+    if (introTimerRef.current) clearTimeout(introTimerRef.current);
+    if (complete) markIntroComplete();
+    setIntroActive(false);
+  }, []);
+
+  const skipIntro = useCallback(() => {
+    endIntro(true);
+    // Completing an automatic sequence: replace, not push.
+    applyTransition(
+      reduceHomepageState(durable, { type: "setView", view: "index" }),
+      "replace",
+    );
+  }, [applyTransition, durable, endIntro]);
+
+  useEffect(() => {
+    if (!introActive) return;
+    // Finite sequence (~2.8s); no animation loop anywhere.
+    introTimerRef.current = setTimeout(() => endIntro(true), INTRO_DURATION_MS);
+    const cancel = () => endIntro(true);
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") cancel();
+    };
+    window.addEventListener("touchstart", cancel, { passive: true });
+    window.addEventListener("scroll", cancel, { passive: true });
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      if (introTimerRef.current) clearTimeout(introTimerRef.current);
+      window.removeEventListener("touchstart", cancel);
+      window.removeEventListener("scroll", cancel);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [endIntro, introActive]);
+
   // ---- Hover grace (M10): leaving a node starts a short timer; entering the
   // details region or another node cancels it. Keyboard focus supersedes. ----
   const handleNodeHover = useCallback((nodeId: string | null) => {
@@ -335,6 +427,21 @@ export default function HomepageIsland({
         </button>
       </div>
 
+      {introActive && isMobile ? (
+        <div className="intro-overlay" data-intro-phase="me">
+          <p className="visually-hidden" aria-live="polite">
+            Introduction to the project graph. Skip anytime.
+          </p>
+          <button
+            type="button"
+            className="control-button intro-skip"
+            onClick={skipIntro}
+          >
+            Skip to projects
+          </button>
+        </div>
+      ) : null}
+
       {focusedSlug ? (
         <p className="focus-banner" ref={bannerRef}>
           Focused on <strong>{focusedProjectTitle}</strong>
@@ -352,64 +459,97 @@ export default function HomepageIsland({
 
       {/* Graph view. Hidden on narrow screens via CSS (Index is primary there). */}
       <section
-        className={`homepage-view-graph${mounted && durable.view !== "graph" ? " view-hidden" : ""}`}
+        className={`homepage-view-graph homepage-graph${introActive ? " intro-active" : ""}${mounted && !introActive && durable.view !== "graph" ? " view-hidden" : ""}`}
         aria-labelledby="graph-heading"
-        aria-hidden={mounted && durable.view !== "graph"}
+        aria-hidden={mounted && !introActive && durable.view !== "graph"}
       >
         <h2 id="graph-heading" className="visually-hidden">
           Project graph
         </h2>
-        <GraphCanvas
-          graph={graph}
-          layoutNodes={layoutNodes}
-          highlightIds={highlightIds}
-          relatedIds={relatedForHighlight}
-          pinnedNodeId={pinnedNodeId}
-          onNodeHover={handleNodeHover}
-          onNodeFocusChange={(nodeId) => {
-            cancelHoverExpiry();
-            setFocusedNodeId(nodeId);
-          }}
-          onNodeActivate={(nodeId) => {
-            // Explicit activation of a project enters its curated focus
-            // scene (Concept note: clicking a project recenters); other
-            // node kinds toggle their pinned detail.
-            const slug = nodeId.startsWith("project:")
-              ? nodeId.slice("project:".length)
-              : null;
-            if (slug && caseStudyHrefBySlug[slug]) {
-              setPinnedNodeId(null);
-              setHoveredNodeId(null);
-              applyTransition(
-                reduceHomepageState(durable, { type: "focusProject", slug }),
-                "push",
-              );
-              return;
-            }
-            setPinnedNodeId((prev) => (prev === nodeId ? null : nodeId));
-          }}
-        />
-        <div onMouseEnter={cancelHoverExpiry}>
-          <GraphDetails
+        {isMobile ? (
+          <p className="mobile-graph-note">
+            The Index is the stable way to browse everything — this graph is an optional
+            visual view.
+          </p>
+        ) : null}
+        {isMobile && focusedSlug ? null : (
+          <GraphCanvas
             graph={graph}
-            activeNode={activeDetailNode}
-            pinned={pinnedNodeId !== null}
-            relatedIdsByNode={relatedIdsByNode}
+            layoutNodes={layoutNodes}
+            highlightIds={highlightIds}
+            relatedIds={relatedForHighlight}
+            pinnedNodeId={pinnedNodeId}
+            onNodeHover={handleNodeHover}
+            onNodeFocusChange={(nodeId) => {
+              cancelHoverExpiry();
+              setFocusedNodeId(nodeId);
+            }}
+            onNodeActivate={(nodeId) => {
+              // Explicit activation of a project enters its curated focus
+              // scene (Concept note: clicking a project recenters); other
+              // node kinds toggle their pinned detail.
+              const slug = nodeId.startsWith("project:")
+                ? nodeId.slice("project:".length)
+                : null;
+              if (slug && caseStudyHrefBySlug[slug]) {
+                setPinnedNodeId(null);
+                setHoveredNodeId(null);
+                applyTransition(
+                  reduceHomepageState(durable, { type: "focusProject", slug }),
+                  "push",
+                );
+                return;
+              }
+              setPinnedNodeId((prev) => (prev === nodeId ? null : nodeId));
+            }}
           />
-        </div>
-        <SearchPanel
-          open={durable.search.open}
-          query={durable.search.query}
-          results={searchResults}
-          activeResultIndex={durable.search.activeResultIndex}
-          onQueryChange={handleSearchQuery}
-          onActiveIndexChange={(index) =>
-            dispatch({ type: "searchActiveResult", index })
-          }
-          onActivateResult={handleActivateResult}
-          onClose={handleSearchClose}
-        />
+        )}
+        {isMobile && focusedSlug ? null : (
+          <div onMouseEnter={cancelHoverExpiry}>
+            <GraphDetails
+              graph={graph}
+              activeNode={activeDetailNode}
+              pinned={pinnedNodeId !== null}
+              relatedIdsByNode={relatedIdsByNode}
+            />
+          </div>
+        )}
       </section>
+
+      {/* Mobile project preview (Goal 4): ?focus= resolves to this stable
+          card on phones regardless of Graph/Index view. */}
+      {isMobile && focusedSlug ? (
+        <MobileProjectPreview
+          project={
+            projects.find((candidate) => candidate.slug === focusedSlug) ?? {
+              slug: focusedSlug,
+              title: focusedSlug,
+              tagline: "",
+              status: "published",
+            }
+          }
+          caseStudyHref={caseStudyHrefBySlug[focusedSlug]}
+          onBackToHome={handleGoHome}
+          onOpenIndex={() => handleSetView("index")}
+          onBack={
+            homepageBackStrategy() === "history"
+              ? () => window.history.back()
+              : handleGoHome
+          }
+        />
+      ) : null}
+
+      {/* Search serves both views with the same engine and URL semantics. */}
+      <SearchPanel
+        open={durable.search.open}
+        query={durable.search.query}
+        results={searchResults}
+        activeResultIndex={durable.search.activeResultIndex}
+        onQueryChange={handleSearchQuery}
+        onActiveIndexChange={(index) => dispatch({ type: "searchActiveResult", index })}
+        onActivateResult={handleActivateResult}
+        onClose={handleSearchClose}
+      />
 
       {/* Index view — the complete semantic fallback content. */}
       <section
@@ -468,5 +608,52 @@ export default function HomepageIsland({
         </ul>
       </section>
     </div>
+  );
+}
+
+function MobileProjectPreview(props: {
+  project: ProjectSummary;
+  caseStudyHref?: string | undefined;
+  onBackToHome: () => void;
+  onOpenIndex: () => void;
+  onBack: () => void;
+}) {
+  const { project, caseStudyHref, onBackToHome, onOpenIndex, onBack } = props;
+  return (
+    <section
+      className="mobile-project-preview"
+      aria-labelledby="mobile-preview-heading"
+    >
+      <h3 id="mobile-preview-heading">{project.title}</h3>
+      <p>{project.tagline}</p>
+      {project.contribution ? (
+        <p className="index-contribution">{project.contribution}</p>
+      ) : null}
+      {project.stack && project.stack.length > 0 ? (
+        <p className="index-stack">
+          {project.stack.map((label) => (
+            <span key={label} className="badge">
+              {label}
+            </span>
+          ))}
+        </p>
+      ) : null}
+      <div className="mobile-preview-actions">
+        {caseStudyHref ? (
+          <a className="control-button control-link" href={caseStudyHref}>
+            View Case Study
+          </a>
+        ) : null}
+        <button type="button" className="control-button" onClick={onOpenIndex}>
+          Index
+        </button>
+        <button type="button" className="control-button" onClick={onBackToHome}>
+          Home
+        </button>
+        <button type="button" className="control-button" onClick={onBack}>
+          Back
+        </button>
+      </div>
+    </section>
   );
 }
